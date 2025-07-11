@@ -1,77 +1,31 @@
 <div align="center">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=32&pause=1000&color=6366F1&background=00000000&center=true&vCenter=true&width=600&lines=RoadTracker;Report+and+Track+Road+Issues;Empowering+Communities" alt="Typing SVG" />
+</div>
 
-# 🛣️ RoadTracker
+<div align="center">
+  <img src="https://user-images.githubusercontent.com/74038190/212284115-f47cd8ff-2ffb-4b04-b5bf-4d1c14c0247f.gif" width="1000">
+</div>
 
-<!-- Animated Sparkle Effect -->
-<svg width="120" height="30" viewBox="0 0 120 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <g>
-    <circle cx="20" cy="15" r="3" fill="#FFD700">
-      <animate attributeName="r" values="3;6;3" dur="1.5s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="1;0.5;1" dur="1.5s" repeatCount="indefinite"/>
-    </circle>
-    <circle cx="60" cy="10" r="2" fill="#50C878">
-      <animate attributeName="r" values="2;4;2" dur="1.2s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="1;0.3;1" dur="1.2s" repeatCount="indefinite"/>
-    </circle>
-    <circle cx="100" cy="20" r="2.5" fill="#4A90E2">
-      <animate attributeName="r" values="2.5;5;2.5" dur="1.8s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="1;0.2;1" dur="1.8s" repeatCount="indefinite"/>
-    </circle>
-  </g>
-</svg>
+<div align="center">
+  <h3>🛣️ A community-driven platform to report and track road issues in your city 🛣️</h3>
+</div>
 
-### _Report and Track Road Issues in Your Community_
+<div align="center">
+  <img src="./public/logo.png" alt="RoadTracker Logo" width="200" height="200">
+</div>
 
-<!-- Animated Car on Road SVG -->
-<svg width="100%" height="60" viewBox="0 0 800 60" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="roadGradient2" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#4A90E2;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#50C878;stop-opacity:1" />
-    </linearGradient>
-  </defs>
-  <rect width="100%" height="12" y="34" fill="url(#roadGradient2)" rx="6">
-    <animate attributeName="opacity" values="0.5;1;0.5" dur="3s" repeatCount="indefinite"/>
-  </rect>
-  <!-- Car -->
-  <g>
-    <rect id="carBody" x="-40" y="20" width="40" height="16" rx="5" fill="#FF6B6B">
-      <animate attributeName="x" values="-40;800;-40" dur="6s" repeatCount="indefinite"/>
-    </rect>
-    <circle id="carWheel1" cx="-30" cy="38" r="4" fill="#222">
-      <animate attributeName="cx" values="-30;810;-30" dur="6s" repeatCount="indefinite"/>
-    </circle>
-    <circle id="carWheel2" cx="-10" cy="38" r="4" fill="#222">
-      <animate attributeName="cx" values="-10;830;-10" dur="6s" repeatCount="indefinite"/>
-    </circle>
-  </g>
-</svg>
+<div align="center">
+  <img src="https://user-images.githubusercontent.com/74038190/212284087-bbe7e430-757e-4901-90bf-4cd2ce3e1852.gif" width="100">
+</div>
 
-<img src="./public/logo.png" alt="RoadTracker Logo" width="200" height="200">
-
-<!-- Animated Road SVG (existing) -->
-<svg width="100%" height="50" viewBox="0 0 800 50" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="roadGradient1" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#4A90E2;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#50C878;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#FFA500;stop-opacity:1" />
-    </linearGradient>
-  </defs>
-  <rect width="100%" height="8" y="21" fill="url(#roadGradient1)" rx="4">
-    <animate attributeName="opacity" values="0.3;1;0.3" dur="3s" repeatCount="indefinite"/>
-  </rect>
-  <circle r="4" fill="#FF6B6B" cy="25" cx="0">
-    <animate attributeName="cx" values="0;800;0" dur="4s" repeatCount="indefinite"/>
-  </circle>
-</svg>
+---
 
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
-<h3>
+<h3 align="center">
   <a href="#features">Features</a> •
   <a href="#demo">Demo</a> •
   <a href="#installation">Installation</a> •
@@ -79,27 +33,11 @@
   <a href="#team">Team</a>
 </h3>
 
-</div>
-
 ---
 
-<!-- Animated Divider SVG -->
 <div align="center">
-<svg width="70%" height="24" viewBox="0 0 700 24" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="dividerGradient2" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:0" />
-      <stop offset="50%" style="stop-color:#50C878;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#FFD700;stop-opacity:0" />
-    </linearGradient>
-  </defs>
-  <line x1="0" y1="12" x2="700" y2="12" stroke="url(#dividerGradient2)" stroke-width="3" />
-  <circle r="5" fill="#50C878" cy="12" cx="350">
-    <animate attributeName="r" values="5;9;5" dur="2s" repeatCount="indefinite"/>
-  </circle>
-</svg>
+  <img src="https://user-images.githubusercontent.com/74038190/212284115-f47cd8ff-2ffb-4b04-b5bf-4d1c14c0247f.gif" width="1000">
 </div>
-
 
 ## 🚀 **About RoadTracker**
 
@@ -114,6 +52,10 @@ RoadTracker is a comprehensive **community-driven platform** that empowers citiz
 - 🔄 **Real-time Updates** - Track issue resolution progress
 
 ---
+
+<div align="center">
+  <img src="https://user-images.githubusercontent.com/74038190/212284158-e840e285-664b-44d7-b79b-e264b5e54825.gif" width="400">
+</div>
 
 ## 🎯 **Features**
 
@@ -132,6 +74,10 @@ RoadTracker is a comprehensive **community-driven platform** that empowers citiz
 
 ---
 
+<div align="center">
+  <img src="https://user-images.githubusercontent.com/74038190/212284115-f47cd8ff-2ffb-4b04-b5bf-4d1c14c0247f.gif" width="1000">
+</div>
+
 ## 🛠️ **Tech Stack**
 
 <div align="center">
@@ -148,6 +94,10 @@ RoadTracker is a comprehensive **community-driven platform** that empowers citiz
 </div>
 
 ---
+
+<div align="center">
+  <img src="https://user-images.githubusercontent.com/74038190/212284158-e840e285-664b-44d7-b79b-e264b5e54825.gif" width="400">
+</div>
 
 ## 📁 **Project Structure**
 
@@ -171,6 +121,10 @@ road-watch-reports-now/
 ```
 
 ---
+
+<div align="center">
+  <img src="https://user-images.githubusercontent.com/74038190/212284115-f47cd8ff-2ffb-4b04-b5bf-4d1c14c0247f.gif" width="1000">
+</div>
 
 ## 👥 **Meet Team HackUnite**
 
@@ -234,6 +188,9 @@ road-watch-reports-now/
 
 ---
 
+<div align="center">
+  <img src="https://user-images.githubusercontent.com/74038190/212284158-e840e285-664b-44d7-b79b-e264b5e54825.gif" width="400">
+</div>
 
 ## 🚀 **Deployment**
 
@@ -248,6 +205,10 @@ This project is optimized for deployment on **Vercel**:
 
 ---
 
+<div align="center">
+  <img src="https://user-images.githubusercontent.com/74038190/212284115-f47cd8ff-2ffb-4b04-b5bf-4d1c14c0247f.gif" width="1000">
+</div>
+
 ## 🤝 **Contributing**
 
 We welcome contributions! Please feel free to submit a Pull Request.
@@ -260,57 +221,19 @@ We welcome contributions! Please feel free to submit a Pull Request.
 
 ---
 
+<div align="center">
+  <img src="https://user-images.githubusercontent.com/74038190/212284158-e840e285-664b-44d7-b79b-e264b5e54825.gif" width="400">
+</div>
+
 ## 📄 **License**
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-<!-- Animated Divider SVG -->
 <div align="center">
-<svg width="70%" height="24" viewBox="0 0 700 24" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="dividerGradient3" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#4A90E2;stop-opacity:0" />
-      <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#4A90E2;stop-opacity:0" />
-    </linearGradient>
-  </defs>
-  <line x1="0" y1="12" x2="700" y2="12" stroke="url(#dividerGradient3)" stroke-width="3" />
-  <circle r="5" fill="#764ba2" cy="12" cx="350">
-    <animate attributeName="r" values="5;9;5" dur="2s" repeatCount="indefinite"/>
-  </circle>
-</svg>
-</div>
-
----
-
-<!-- Animated Divider SVG -->
-<div align="center">
-<svg width="70%" height="24" viewBox="0 0 700 24" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="dividerGradient4" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#FFA500;stop-opacity:0" />
-      <stop offset="50%" style="stop-color:#FF6B6B;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#FFA500;stop-opacity:0" />
-    </linearGradient>
-  </defs>
-  <line x1="0" y1="12" x2="700" y2="12" stroke="url(#dividerGradient4)" stroke-width="3" />
-  <circle r="5" fill="#FF6B6B" cy="12" cx="350">
-    <animate attributeName="r" values="5;9;5" dur="2s" repeatCount="indefinite"/>
-  </circle>
-</svg>
-</div>
-
----
-
-<div align="center">
-
-### 🌟 **Star this repository if you found it helpful!**
-
-**Made with ❤️ by Team HackUnite**
-
-<img src="https://forthebadge.com/images/badges/built-with-love.svg" alt="Built with Love">
-<img src="https://forthebadge.com/images/badges/made-with-typescript.svg" alt="Made with TypeScript">
-
+  <h3>🌟 Star this repository if you found it helpful! 🌟</h3>
+  <img src="https://forthebadge.com/images/badges/built-with-love.svg" alt="Built with Love">
+  <img src="https://forthebadge.com/images/badges/made-with-typescript.svg" alt="Made with TypeScript">
+  <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="700">
 </div>
