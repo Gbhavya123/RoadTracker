@@ -1,0 +1,88 @@
+import React from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { useAuth } from '../hooks/useAuth';
+import { FileText, CheckCircle, Clock, AlertCircle, Award } from 'lucide-react';
+
+const statusColors: Record<string, string> = {
+  resolved: 'bg-green-100 text-green-800',
+  'in-progress': 'bg-blue-100 text-blue-800',
+  verified: 'bg-yellow-100 text-yellow-800',
+  pending: 'bg-gray-100 text-gray-800',
+};
+
+const statusIcons: Record<string, React.ReactNode> = {
+  resolved: <CheckCircle className="w-4 h-4 text-green-500 inline mr-1" />,
+  'in-progress': <Clock className="w-4 h-4 text-blue-500 inline mr-1" />,
+  verified: <Award className="w-4 h-4 text-yellow-500 inline mr-1" />,
+  pending: <AlertCircle className="w-4 h-4 text-gray-500 inline mr-1" />,
+};
+
+const MyReports = () => {
+  const { user } = useAuth();
+  const reports = user?.reports || [
+    { id: 1, type: 'Pothole', location: 'Main Street & 5th Ave', status: 'resolved', date: '2024-06-10' },
+    { id: 2, type: 'Road Crack', location: 'Oak Boulevard', status: 'in-progress', date: '2024-06-12' },
+    { id: 3, type: 'Water-logging', location: 'River Road', status: 'verified', date: '2024-06-14' },
+  ];
+
+  const resolved = reports.filter((r) => r.status === 'resolved').length;
+  const inProgress = reports.filter((r) => r.status === 'in-progress').length;
+  const verified = reports.filter((r) => r.status === 'verified').length;
+  const pending = reports.filter((r) => r.status === 'pending').length;
+
+  return (
+    <div className="min-h-screen py-12 px-4 flex flex-col items-center relative overflow-hidden">
+      {/* Grid background */}
+      <div className="absolute inset-0 w-full h-full bg-[linear-gradient(to_right,rgba(17,24,39,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(17,24,39,0.04)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.07)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0" />
+      <Card className="w-full max-w-2xl mb-8 shadow-xl relative z-10">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">My Reports</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="flex flex-col items-center">
+              <FileText className="w-6 h-6 text-blue-500 mb-1" />
+              <div className="font-bold text-lg text-gray-900 dark:text-white">{reports.length}</div>
+              <div className="text-xs text-gray-500">Total</div>
+            </div>
+            <div className="flex flex-col items-center">
+              <CheckCircle className="w-6 h-6 text-green-500 mb-1" />
+              <div className="font-bold text-lg text-gray-900 dark:text-white">{resolved}</div>
+              <div className="text-xs text-gray-500">Resolved</div>
+            </div>
+            <div className="flex flex-col items-center">
+              <Clock className="w-6 h-6 text-blue-500 mb-1" />
+              <div className="font-bold text-lg text-gray-900 dark:text-white">{inProgress}</div>
+              <div className="text-xs text-gray-500">In Progress</div>
+            </div>
+            <div className="flex flex-col items-center">
+              <Award className="w-6 h-6 text-yellow-500 mb-1" />
+              <div className="font-bold text-lg text-gray-900 dark:text-white">{verified}</div>
+              <div className="text-xs text-gray-500">Verified</div>
+            </div>
+          </div>
+          {reports.length === 0 ? (
+            <div className="text-center text-gray-500 dark:text-gray-300 py-8">You have not submitted any reports yet.</div>
+          ) : (
+            <div className="space-y-4">
+              {reports.map((report) => (
+                <div key={report.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <div className="font-semibold text-blue-700 dark:text-blue-300">{report.type}</div>
+                    <div className="text-gray-500 dark:text-gray-300 text-sm">{report.location}</div>
+                  </div>
+                  <div className="flex flex-col md:items-end mt-2 md:mt-0">
+                    <span className={`text-xs font-medium px-2 py-1 rounded mb-1 flex items-center gap-1 ${statusColors[report.status] || 'bg-gray-100 text-gray-800'}`}>{statusIcons[report.status]}{report.status}</span>
+                    <span className="text-xs text-gray-400">{report.date}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default MyReports; 

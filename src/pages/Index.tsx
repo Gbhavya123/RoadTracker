@@ -8,6 +8,8 @@ import UserDashboard from '../components/UserDashboard';
 import AdminDashboard from '../components/AdminDashboard';
 import Navigation from '../components/Navigation';
 import { useAuth } from '../hooks/useAuth';
+import Profile from './Profile';
+import MyReports from './MyReports';
 
 function RequireAuth({ children, role }: { children: JSX.Element, role: 'admin' | 'user' }) {
   const { isAuthenticated, role: authRole } = useAuth();
@@ -28,6 +30,8 @@ const Index = () => {
           <Route path="/map" element={<MapView />} />
           <Route path="/dashboard/user" element={<RequireAuth role="user"><UserDashboard /></RequireAuth>} />
           <Route path="/dashboard/admin" element={<RequireAuth role="admin"><AdminDashboard /></RequireAuth>} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/my-reports" element={<MyReports />} />
         </Routes>
       </div>
     </Router>
