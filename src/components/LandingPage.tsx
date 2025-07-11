@@ -1,5 +1,7 @@
 
 import React from 'react';
+import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { ArrowRight, MapPin, Users, Shield, Star, Zap, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 const LandingPage = () => {
   const { setUser } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLoginSuccess = (credentialResponse: any) => {
     if (credentialResponse.credential) {
@@ -25,6 +28,14 @@ const LandingPage = () => {
       }
     }
   };
+
+  // On initial load, scroll hero into view if on landing page
+  useEffect(() => {
+    if (location.pathname === '/') {
+      const el = document.getElementById('hero');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [location.pathname]);
 
   const features = [
     {
