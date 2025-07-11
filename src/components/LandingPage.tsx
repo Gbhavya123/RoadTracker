@@ -155,7 +155,7 @@ const LandingPage = () => {
         <div className="absolute inset-0 w-full h-full bg-[linear-gradient(to_right,rgba(17,24,39,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(17,24,39,0.04)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.07)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0" />
         <div className="w-full flex flex-col items-center justify-start relative z-10">
           <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-center mb-2 mt-6 sm:mt-10 md:mt-14 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent animate-fade-in-up">Features</h2>
-          <div className="flex flex-col md:flex-row gap-10 justify-center items-center w-full max-w-4xl mt-4">
+          <div className="flex flex-col md:flex-row gap-5 justify-center items-center w-full max-w-4xl -mt-10">
             {['/features/1.png', '/features/2.png', '/features/3.png', '/features/4.png'].map((img, i) => (
               <div
                 key={img}
@@ -265,7 +265,7 @@ const LandingPage = () => {
           {/* About/Description full width on mobile */}
           <div className="mb-6 md:mb-0 flex flex-col items-start text-left w-full">
             <div className="flex items-center mb-3">
-              <img src="/public/logo.png" alt="RoadTracker Logo" className="w-10 h-10 rounded-full mr-2" />
+              <img src="/logo.png" alt="RoadTracker Logo" className="w-10 h-10 rounded-full mr-2" />
               <span className="text-2xl font-bold text-gray-900 dark:text-white">RoadTracker</span>
             </div>
             <p className="text-gray-600 dark:text-gray-300 text-sm max-w-xl">Effortlessly report and track road issues. Collaborate with your community and local authorities to make roads safer for everyone!</p>

@@ -158,86 +158,91 @@ const Navigation = () => {
                 </Link>
               );
             })}
-            {isAuthenticated ? (
-              <div className="flex items-center gap-2 ml-auto relative">
+            {/* Right-aligned controls: theme toggle and sign in/user */}
+            <div className="flex items-center gap-2 ml-auto">
+              <div className="flex items-center">
                 <FancyThemeToggle />
-                {/* User Avatar Dropdown */}
-                <div className="relative">
-                  <button
-                    onClick={() => setDropdownOpen((open) => !open)}
-                    className="flex items-center justify-center w-10 h-10 rounded-full border-2 border-blue-200 dark:border-blue-800 bg-white dark:bg-gray-900 shadow hover:ring-2 hover:ring-blue-400 transition-all focus:outline-none"
-                    aria-label="User menu"
-                  >
-                    {user && user.picture ? (
-                      <img src={user.picture} alt="Profile" className="w-9 h-9 rounded-full object-cover" />
-                    ) : (
-                      <span className="w-9 h-9 flex items-center justify-center rounded-full bg-blue-600 text-white font-bold text-lg">
-                        {user && user.name ? user.name.split(' ').map(n => n[0]).join('') : <User className="w-6 h-6" />}
-                      </span>
-                    )}
-                  </button>
-                  {dropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 z-50 animate-fade-in flex flex-col py-2">
-                      <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
-                        {user && user.picture ? (
-                          <img src={user.picture} alt="Profile" className="w-8 h-8 rounded-full object-cover" />
-                        ) : (
-                          <span className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-600 text-white font-bold text-lg">
-                            {user && user.name ? user.name.split(' ').map(n => n[0]).join('') : <User className="w-5 h-5" />}
-                          </span>
-                        )}
-                        <div>
-                          <div className="font-semibold text-gray-900 dark:text-white">{user?.name}</div>
-                          <div className="text-xs text-gray-500 dark:text-gray-300">{user?.email}</div>
-                        </div>
-                      </div>
-                      <button onClick={() => { setDropdownOpen(false); navigate('/profile'); }} className="px-4 py-2 text-left hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors text-gray-800 dark:text-gray-100">Profile</button>
-                      <button onClick={() => { setDropdownOpen(false); navigate('/dashboard/user'); }} className="px-4 py-2 text-left hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors text-gray-800 dark:text-gray-100">Dashboard</button>
-                      <button onClick={() => { setDropdownOpen(false); navigate('/my-reports'); }} className="px-4 py-2 text-left hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors text-gray-800 dark:text-gray-100">My Reports</button>
-                      <button onClick={() => { setDropdownOpen(false); logout(); }} className="px-4 py-2 text-left text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">Sign Out</button>
-                    </div>
-                  )}
-                </div>
               </div>
-            ) : (
-              <div className="relative">
-                <Button
-                  className="ml-4 flex items-center gap-2 bg-white text-gray-800 border border-gray-300 shadow hover:bg-gray-100 hover:shadow-lg transition-all duration-200 px-5 py-2 rounded-lg"
-                  onClick={() => setDropdownOpen((open) => !open)}
-                  onBlur={() => setTimeout(() => setDropdownOpen(false), 150)}
-                >
-                  <FcGoogle className="w-5 h-5" />
-                  <span>Sign In</span>
-                </Button>
-                <AnimatePresence>
-                  {dropdownOpen && !role && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute right-0 mt-2 w-[calc(100%+16px)] min-w-[180px] bg-white rounded-lg shadow-lg z-50 flex flex-col gap-2 p-2 border border-gray-200"
-                      style={{ minWidth: '200px' }}
+              {isAuthenticated ? (
+                <div className="flex items-center gap-2 relative">
+                  {/* User Avatar Dropdown */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setDropdownOpen((open) => !open)}
+                      className="flex items-center justify-center w-10 h-10 rounded-full border-2 border-blue-200 dark:border-blue-800 bg-white dark:bg-gray-900 shadow hover:ring-2 hover:ring-blue-400 transition-all focus:outline-none"
+                      aria-label="User menu"
                     >
-                      <button
-                        className="flex items-center gap-2 px-5 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition border border-gray-300 shadow"
-                        style={{ height: '40px' }}
-                        onClick={() => loginAsAdmin()}
+                      {user && user.picture ? (
+                        <img src={user.picture} alt="Profile" className="w-9 h-9 rounded-full object-cover" />
+                      ) : (
+                        <span className="w-9 h-9 flex items-center justify-center rounded-full bg-blue-600 text-white font-bold text-lg">
+                          {user && user.name ? user.name.split(' ').map(n => n[0]).join('') : <User className="w-6 h-6" />}
+                        </span>
+                      )}
+                    </button>
+                    {dropdownOpen && (
+                      <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 z-50 animate-fade-in flex flex-col py-2">
+                        <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
+                          {user && user.picture ? (
+                            <img src={user.picture} alt="Profile" className="w-8 h-8 rounded-full object-cover" />
+                          ) : (
+                            <span className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-600 text-white font-bold text-lg">
+                              {user && user.name ? user.name.split(' ').map(n => n[0]).join('') : <User className="w-5 h-5" />}
+                            </span>
+                          )}
+                          <div>
+                            <div className="font-semibold text-gray-900 dark:text-white">{user?.name}</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-300">{user?.email}</div>
+                          </div>
+                        </div>
+                        <button onClick={() => { setDropdownOpen(false); navigate('/profile'); }} className="px-4 py-2 text-left hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors text-gray-800 dark:text-gray-100">Profile</button>
+                        <button onClick={() => { setDropdownOpen(false); navigate('/dashboard/user'); }} className="px-4 py-2 text-left hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors text-gray-800 dark:text-gray-100">Dashboard</button>
+                        <button onClick={() => { setDropdownOpen(false); navigate('/my-reports'); }} className="px-4 py-2 text-left hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors text-gray-800 dark:text-gray-100">My Reports</button>
+                        <button onClick={() => { setDropdownOpen(false); logout(); }} className="px-4 py-2 text-left text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">Sign Out</button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="relative">
+                  <Button
+                    className="ml-4 flex items-center gap-2 bg-white text-gray-800 border border-gray-300 shadow hover:bg-gray-100 hover:shadow-lg transition-all duration-200 px-5 py-2 rounded-lg"
+                    onClick={() => setDropdownOpen((open) => !open)}
+                    onBlur={() => setTimeout(() => setDropdownOpen(false), 150)}
+                  >
+                    <FcGoogle className="w-5 h-5" />
+                    <span>Sign In</span>
+                  </Button>
+                  <AnimatePresence>
+                    {dropdownOpen && !role && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute right-0 mt-2 w-[calc(100%+16px)] min-w-[180px] bg-white rounded-lg shadow-lg z-50 flex flex-col gap-2 p-2 border border-gray-200"
+                        style={{ minWidth: '200px' }}
                       >
-                        <FcGoogle className="w-5 h-5" /> Admin
-                      </button>
-                      <button
-                        className="flex items-center gap-2 px-5 py-2 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition border border-gray-300 shadow"
-                        style={{ height: '40px' }}
-                        onClick={() => loginAsUser()}
-                      >
-                        <FcGoogle className="w-5 h-5" /> User
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            )}
+                        <button
+                          className="flex items-center gap-2 px-5 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition border border-gray-300 shadow"
+                          style={{ height: '40px' }}
+                          onClick={() => loginAsAdmin()}
+                        >
+                          <FcGoogle className="w-5 h-5" /> Admin
+                        </button>
+                        <button
+                          className="flex items-center gap-2 px-5 py-2 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition border border-gray-300 shadow"
+                          style={{ height: '40px' }}
+                          onClick={() => loginAsUser()}
+                        >
+                          <FcGoogle className="w-5 h-5" /> User
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Mobile menu button and theme toggle */}
