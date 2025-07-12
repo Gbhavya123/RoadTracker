@@ -141,47 +141,48 @@ const Navigation = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex flex-1 justify-center items-center space-x-1">
-            <button
-              onClick={handleHomeScroll}
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-accent text-muted-foreground hover:text-foreground focus:outline-none"
-            >
-              Home
-            </button>
-            {isLanding && sectionLinks.slice(1).map((item) => (
+          <div className="hidden md:flex flex-1 items-center justify-between">
+            <div className='flex justify-center flex-1 space-x-1'>
               <button
-                key={item.id}
-                onClick={() => handleSectionScroll(item.id)}
+                onClick={handleHomeScroll}
                 className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-accent text-muted-foreground hover:text-foreground focus:outline-none"
               >
-                {item.name}
+                Home
               </button>
-            ))}
-            {/* CTA Section Link in Navbar */}
-            <button
-              onClick={handleCtaScroll}
-              className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-accent text-muted-foreground hover:text-foreground focus:outline-none"
-            >
-              <MapPin className="w-4 h-4" />
-              <span>Get Started</span>
-            </button>
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-accent ${
-                    isActive(item.path)
-                      ? 'bg-accent text-accent-foreground'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
+              {isLanding && sectionLinks.slice(1).map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => handleSectionScroll(item.id)}
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-accent text-muted-foreground hover:text-foreground focus:outline-none"
                 >
-                  <Icon className="w-4 h-4" />
-                  <span>{item.name}</span>
-                </Link>
-              );
-            })}
+                  {item.name}
+                </button>
+              ))}
+              {/* CTA Section Link in Navbar */}
+              <button
+                onClick={handleCtaScroll}
+                className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-accent text-muted-foreground hover:text-foreground focus:outline-none"
+              >
+                <MapPin className="w-4 h-4" />
+                <span>Get Started</span>
+              </button>
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.path}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-accent ${isActive(item.path)
+                        ? 'bg-accent text-accent-foreground'
+                        : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span>{item.name}</span>
+                  </Link>
+                );
+              })}
+            </div>
             {/* Right-aligned controls: theme toggle and sign in/user */}
             <div className="flex items-center gap-2 ml-auto">
               <div className="flex items-center">
@@ -348,11 +349,10 @@ const Navigation = () => {
                   key={item.name}
                   to={item.path}
                   onClick={() => setIsMenuOpen(false)}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                    isActive(item.path)
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActive(item.path)
                       ? 'bg-accent text-accent-foreground'
                       : 'text-muted-foreground hover:bg-accent hover:text-foreground'
-                  }`}
+                    }`}
                 >
                   <Icon className="w-5 h-5" />
                   <span>{item.name}</span>
