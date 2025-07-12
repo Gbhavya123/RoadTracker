@@ -149,23 +149,30 @@ const Navigation = () => {
               >
                 Home
               </button>
-              {isLanding && sectionLinks.slice(1).map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => handleSectionScroll(item.id)}
-                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-accent text-muted-foreground hover:text-foreground focus:outline-none"
-                >
-                  {item.name}
-                </button>
-              ))}
+              {isLanding && (
+                <>
+                  {/* Only show section links if not authenticated */}
+                  {!isAuthenticated && sectionLinks.slice(1).map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => handleSectionScroll(item.id)}
+                      className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-accent text-muted-foreground hover:text-foreground focus:outline-none"
+                    >
+                      {item.name}
+                    </button>
+                  ))}
+                </>
+              )}
               {/* CTA Section Link in Navbar */}
-              <button
-                onClick={handleCtaScroll}
-                className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-accent text-muted-foreground hover:text-foreground focus:outline-none"
-              >
-                <MapPin className="w-4 h-4" />
-                <span>Get Started</span>
-              </button>
+              {!isAuthenticated && (
+                <button
+                  onClick={handleCtaScroll}
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-accent text-muted-foreground hover:text-foreground focus:outline-none"
+                >
+                  <MapPin className="w-4 h-4" />
+                  <span>Get Started</span>
+                </button>
+              )}
               {navItems.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -330,7 +337,8 @@ const Navigation = () => {
                 >
                   Home
                 </button>
-                {sectionLinks.slice(1).map((item) => (
+                {/* Only show section links if not authenticated */}
+                {!isAuthenticated && sectionLinks.slice(1).map((item) => (
                   <button
                     key={item.id}
                     onClick={() => { handleSectionScroll(item.id); setIsMenuOpen(false); }}
