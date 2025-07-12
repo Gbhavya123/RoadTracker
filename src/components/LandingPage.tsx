@@ -154,24 +154,32 @@ const LandingPage = () => {
       {/* How It Works */}
       <section
         id="how-it-works"
-        className="min-h-screen flex items-center py-20 bg-white dark:bg-gray-900 transition-colors duration-500">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+        className="min-h-screen flex items-center py-20 bg-gradient-to-br from-white via-blue-50 to-blue-100 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 transition-colors duration-500">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-4 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent drop-shadow-lg">
             How RoadTracker Works
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-16">
+          <p className="text-lg md:text-2xl text-center text-gray-700 dark:text-gray-300 mb-12 font-medium">
             Three simple steps to make your community's roads safer
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-start">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 md:gap-12 items-stretch">
             {steps.map((step, idx) => (
-              <div key={idx} className="flex flex-col items-center">
-                <div className="w-24 h-24 rounded-2xl flex items-center justify-center mb-6 text-3xl font-bold text-white shadow-lg bg-gradient-to-br from-blue-500 to-blue-700 dark:from-blue-700 dark:to-blue-900">
+              <div
+                key={idx}
+                className="group flex flex-col items-center justify-between bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl rounded-3xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 md:p-8 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:border-blue-400 dark:hover:border-blue-500 cursor-pointer relative overflow-hidden"
+                style={{ minHeight: '370px' }}
+              >
+                {/* Placeholder for image */}
+                <div className="w-24 h-24 mb-6 rounded-2xl bg-gradient-to-br from-blue-200 via-blue-400 to-blue-600 dark:from-blue-700 dark:via-blue-800 dark:to-blue-900 flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:shadow-blue-200 dark:group-hover:shadow-blue-900 transition-transform duration-300">
+                  <span className="text-3xl font-bold text-white opacity-80 select-none">IMG</span>
+                </div>
+                <div className="absolute top-4 left-4 w-10 h-10 flex items-center justify-center rounded-xl bg-white/80 dark:bg-gray-900/80 shadow border border-gray-200 dark:border-gray-700 text-blue-700 dark:text-blue-300 text-lg font-bold">
                   {step.number}
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-2 text-center drop-shadow">
                   {step.title}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-300">
+                <p className="text-gray-600 dark:text-gray-300 text-center text-base md:text-lg font-normal">
                   {step.description}
                 </p>
               </div>
