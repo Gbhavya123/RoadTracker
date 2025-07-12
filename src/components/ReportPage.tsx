@@ -78,9 +78,9 @@ const ReportPage = () => {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 dark:text-white mb-2">Report a Road Issue</h1>
         <p className="text-center text-gray-600 dark:text-gray-300 mb-10">Help make your community safer by reporting potholes, cracks, and other road hazards</p>
-        <div className="grid md:grid-cols-2 gap-8 items-start w-full">
+        <div className="flex flex-col md:grid md:grid-cols-2 gap-4 md:gap-8 items-start w-full">
           {/* Issue Details Card */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 transition-colors duration-500">
+          <div className="bg-white dark:bg-gray-800 rounded-xl md:rounded-2xl shadow p-4 md:p-8 transition-colors duration-500 w-full">
             <CardHeader>
               <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white">Issue Details</CardTitle>
             </CardHeader>
@@ -225,8 +225,8 @@ const ReportPage = () => {
             </CardContent>
           </div>
           {/* Report Preview + Tips (right column) */}
-          <div className="flex flex-col gap-4">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 transition-colors duration-500">
+          <div className="flex flex-col gap-4 w-full mt-4 md:mt-0">
+            <div className="bg-white dark:bg-gray-800 rounded-xl md:rounded-2xl shadow p-4 md:p-8 transition-colors duration-500 w-full">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Report Preview</h2>
               <CardContent>
                 <div className="space-y-4">
@@ -289,7 +289,7 @@ const ReportPage = () => {
           </div>
         </div>
         {/* Tips Card for mobile (below grid) */}
-        <div className="bg-blue-50 dark:bg-gray-900 rounded-xl p-6 mt-4 text-left shadow border border-blue-100 dark:border-gray-700 md:hidden">
+        <div className="bg-blue-50 dark:bg-gray-900 rounded-lg p-4 mt-4 text-left shadow border border-blue-100 dark:border-gray-700 md:hidden">
           <h3 className="text-blue-700 dark:text-blue-300 font-semibold mb-2 flex items-center gap-2">
             <span>📝</span> Reporting Tips
           </h3>
