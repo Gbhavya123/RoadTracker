@@ -270,22 +270,7 @@ const LandingPage = () => {
             everyone in your neighborhood.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/report">
-              <Button
-                size="lg"
-                className="bg-white text-blue-700 hover:bg-gray-100 text-lg px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                Report Your First Issue
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-            </Link>
-            <Link to="/map">
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-2 border-white text-blue-700 dark:text-white hover:bg-white hover:text-blue-700 text-lg px-8 py-4 rounded-xl transition-all duration-300">
-                Live Map
-              </Button>
-            </Link>
+            {/* Buttons removed as requested */}
           </div>
         </div>
       </section>
