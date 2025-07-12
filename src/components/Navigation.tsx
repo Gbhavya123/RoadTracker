@@ -28,6 +28,7 @@ const Navigation = () => {
       })
         .then((res) => res.json())
         .then((data) => {
+          console.log('Google user data (admin):', data); // Debug log
           setUser(data);
           setDropdownOpen(false);
           setAuthRole('admin');
@@ -48,6 +49,7 @@ const Navigation = () => {
       })
         .then((res) => res.json())
         .then((data) => {
+          console.log('Google user data (user):', data); // Debug log
           setUser(data);
           setDropdownOpen(false);
           setAuthRole('user');
@@ -76,9 +78,6 @@ const Navigation = () => {
     { name: 'Home', id: 'hero' },
     { name: 'How It Works', id: 'how-it-works' },
     { name: 'Features', id: 'features' },
-    { name: 'Map', id: 'map' },
-    { name: 'Get Started', id: 'cta' },
-    { name: 'FAQ', id: 'faq' },
   ];
 
   // Only show section links on landing page
@@ -260,6 +259,63 @@ const Navigation = () => {
         {/* Mobile Navigation */}
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-border animate-in slide-in-from-top-2 duration-200">
+            {/* Profile icon and user dropdown for mobile */}
+            {isAuthenticated && (
+              <div className="flex flex-col gap-1 px-4 pb-2">
+                <div className="flex items-center gap-3 pb-2">
+                  {user && user.picture ? (
+                    <img src={user.picture} alt="Profile" className="w-10 h-10 rounded-full object-cover border-2 border-blue-200 dark:border-blue-800" />
+                  ) : (
+                    <span className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-600 text-white font-bold text-lg">
+                      {user && user.name ? user.name.split(' ').map(n => n[0]).join('') : <User className="w-6 h-6" />}
+                    </span>
+                  )}
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-gray-900 dark:text-white text-base">{user?.name}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-300">{user?.email}</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => { setIsMenuOpen(false); navigate('/profile'); }}
+                  className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-800 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+                >
+                  Profile
+                </button>
+                <button
+                  onClick={() => { setIsMenuOpen(false); navigate('/dashboard/user'); }}
+                  className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-800 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+                >
+                  Dashboard
+                </button>
+                <button
+                  onClick={() => { setIsMenuOpen(false); navigate('/my-reports'); }}
+                  className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-800 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+                >
+                  My Reports
+                </button>
+              </div>
+            )}
+            {/* Section links for landing page */}
+            {isLanding && (
+              <div className="flex flex-col gap-1 px-4 pb-2">
+                <button
+                  onClick={() => { handleHomeScroll(); setIsMenuOpen(false); }}
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-accent text-muted-foreground hover:text-foreground focus:outline-none text-left"
+                >
+                  Home
+                </button>
+                {sectionLinks.slice(1).map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => { handleSectionScroll(item.id); setIsMenuOpen(false); }}
+                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-accent text-muted-foreground hover:text-foreground focus:outline-none text-left"
+                  >
+                    {item.name}
+                  </button>
+                ))}
+              </div>
+            )}
+            {/* Main nav items */}
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -284,9 +340,42 @@ const Navigation = () => {
                   Sign Out
                 </Button>
               ) : (
-                <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700" asChild>
-                  <a href="/">Sign In</a>
-                </Button>
+                <div className="relative w-full">
+                  <Button
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 flex items-center justify-center"
+                    onClick={() => setDropdownOpen((open) => !open)}
+                    onBlur={() => setTimeout(() => setDropdownOpen(false), 150)}
+                  >
+                    <span>Sign In</span>
+                  </Button>
+                  <AnimatePresence>
+                    {dropdownOpen && !role && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute left-0 right-0 mt-2 w-full min-w-[180px] bg-white rounded-lg shadow-lg z-50 flex flex-col gap-2 p-2 border border-gray-200"
+                        style={{ minWidth: '200px' }}
+                      >
+                        <button
+                          className="flex items-center gap-2 px-5 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition border border-gray-300 shadow"
+                          style={{ height: '40px' }}
+                          onClick={() => { loginAsAdmin(); setIsMenuOpen(false); }}
+                        >
+                          <FcGoogle className="w-5 h-5" /> Admin
+                        </button>
+                        <button
+                          className="flex items-center gap-2 px-5 py-2 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition border border-gray-300 shadow"
+                          style={{ height: '40px' }}
+                          onClick={() => { loginAsUser(); setIsMenuOpen(false); }}
+                        >
+                          <FcGoogle className="w-5 h-5" /> User
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               )}
             </div>
           </div>
