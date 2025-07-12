@@ -215,7 +215,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Map Preview */}
+      {/* Real-Time Issue Tracking (Map) Section */}
       <section
         id="map"
         className="min-h-screen flex items-center py-20 bg-white dark:bg-gray-900 transition-colors duration-500">
