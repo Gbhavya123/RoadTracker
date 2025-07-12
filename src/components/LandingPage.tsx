@@ -185,26 +185,19 @@ const LandingPage = () => {
           <p className="text-lg md:text-2xl text-center text-gray-700 dark:text-gray-300 mb-12 font-medium">
             Three simple steps to make your community's roads safer
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 md:gap-12 items-stretch">
-            {steps.map((step, idx) => (
+          <div className="flex flex-col md:flex-row gap-8 md:gap-12 items-center justify-center">
+            {["/features/11.jpg", "/features/22.jpg", "/features/33.jpg"].map((img, idx) => (
               <div
                 key={idx}
-                className="group flex flex-col items-center justify-between bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl rounded-3xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 md:p-8 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:border-blue-400 dark:hover:border-blue-500 cursor-pointer relative overflow-hidden"
-                style={{ minHeight: '370px' }}
+                className="group relative cursor-pointer rounded-3xl overflow-hidden shadow-xl transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:ring-4 hover:ring-blue-300 dark:hover:ring-blue-800"
+                style={{ width: '320px', height: '380px', background: 'rgba(255,255,255,0.7)' }}
               >
-                {/* Placeholder for image */}
-                <div className="w-24 h-24 mb-6 rounded-2xl bg-gradient-to-br from-blue-200 via-blue-400 to-blue-600 dark:from-blue-700 dark:via-blue-800 dark:to-blue-900 flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:shadow-blue-200 dark:group-hover:shadow-blue-900 transition-transform duration-300">
-                  <span className="text-3xl font-bold text-white opacity-80 select-none">IMG</span>
-                </div>
-                <div className="absolute top-4 left-4 w-10 h-10 flex items-center justify-center rounded-xl bg-white/80 dark:bg-gray-900/80 shadow border border-gray-200 dark:border-gray-700 text-blue-700 dark:text-blue-300 text-lg font-bold">
-                  {step.number}
-                </div>
-                <h3 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-2 text-center drop-shadow">
-                  {step.title}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 text-center text-base md:text-lg font-normal">
-                  {step.description}
-                </p>
+                <img
+                  src={img}
+                  alt={`Step Visual ${idx + 1}`}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 group-hover:brightness-110 group-hover:contrast-125"
+                />
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-400/10 via-purple-400/10 to-blue-800/10 opacity-0 group-hover:opacity-80 transition-opacity duration-500 pointer-events-none" />
               </div>
             ))}
           </div>
