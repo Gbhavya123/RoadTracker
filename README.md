@@ -8,10 +8,6 @@
 </div>
 
 <div align="center">
-  <img src="./public/logo.png" alt="RoadTracker Logo" width="200" height="200">
-</div>
-
-<div align="center">
   <img src="https://user-images.githubusercontent.com/74038190/212284087-bbe7e430-757e-4901-90bf-4cd2ce3e1852.gif" width="100">
 </div>
 
