@@ -10,11 +10,14 @@ import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/components/ui/use-toast';
 
 const LandingPage = () => {
   const { setUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
+  const { toast } = useToast();
 
   const handleLoginSuccess = (credentialResponse: any) => {
     if (credentialResponse.credential) {
@@ -111,22 +114,42 @@ const LandingPage = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in [animation-delay:600ms]">
-              <Link to="/report">
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-lg px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                  Report an Issue
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </Link>
-              <Link to="/map">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="text-lg px-8 py-4 rounded-xl border-2 hover:bg-gray-50 transition-all duration-300">
-                  View Live Map
-                </Button>
-              </Link>
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-lg px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    toast({
+                      title: 'Please sign in to continue',
+                      description: 'You need to be signed in to report an issue.',
+                      variant: 'destructive',
+                    });
+                  } else {
+                    navigate('/report');
+                  }
+                }}
+              >
+                Report an Issue
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="text-lg px-8 py-4 rounded-xl border-2 hover:bg-gray-50 transition-all duration-300"
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    toast({
+                      title: 'Please sign in to continue',
+                      description: 'You need to be signed in to view the live map.',
+                      variant: 'destructive',
+                    });
+                  } else {
+                    navigate('/map');
+                  }
+                }}
+              >
+                View Live Map
+              </Button>
             </div>
 
             {/* Stats */}
