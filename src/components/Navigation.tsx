@@ -326,17 +326,18 @@ const Navigation = () => {
                 >
                   My Reports
                 </button>
+                {/* Home button after My Reports */}
+                <button
+                  onClick={() => { handleHomeScroll(); setIsMenuOpen(false); }}
+                  className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-800 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+                >
+                  Home
+                </button>
               </div>
             )}
             {/* Section links for landing page */}
             {isLanding && (
               <div className="flex flex-col gap-1 px-4 pb-2">
-                <button
-                  onClick={() => { handleHomeScroll(); setIsMenuOpen(false); }}
-                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-accent text-muted-foreground hover:text-foreground focus:outline-none text-left"
-                >
-                  Home
-                </button>
                 {/* Only show section links if not authenticated */}
                 {!isAuthenticated && sectionLinks.slice(1).map((item) => (
                   <button
@@ -347,6 +348,16 @@ const Navigation = () => {
                     {item.name}
                   </button>
                 ))}
+                {/* Only show Get Started if not authenticated */}
+                {!isAuthenticated && (
+                  <button
+                    onClick={() => { handleCtaScroll(); setIsMenuOpen(false); }}
+                    className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-accent text-muted-foreground hover:text-foreground focus:outline-none text-left"
+                  >
+                    <MapPin className="w-4 h-4" />
+                    <span>Get Started</span>
+                  </button>
+                )}
               </div>
             )}
             {/* Main nav items */}
