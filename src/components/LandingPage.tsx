@@ -387,11 +387,11 @@ const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 pt-8 pb-4 sm:pt-12 sm:pb-6">
+      <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 pt-6 pb-3 sm:pt-8 sm:pb-4">
         <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
           {/* About/Description full width on mobile */}
-          <div className="mb-6 md:mb-0 flex flex-col items-start text-left w-full">
-            <div className="flex items-center mb-3">
+          <div className="mb-4 md:mb-0 flex flex-col items-start text-left w-full">
+            <div className="flex items-center mb-2">
               <img
                 src="/logo.png"
                 alt="RoadTracker Logo"
@@ -407,7 +407,7 @@ const LandingPage = () => {
             </p>
           </div>
           {/* Grid for links/sections on mobile, flex on desktop */}
-          <div className="grid grid-cols-2 gap-x-8 gap-y-6 md:flex md:flex-row md:items-start md:justify-between md:gap-12">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4 md:flex md:flex-row md:items-start md:justify-between md:gap-8">
             {/* Quick Links */}
             <div className="flex flex-col items-start">
               <h4 className="font-semibold text-gray-900 dark:text-white mb-2 text-base sm:text-lg">
@@ -536,8 +536,8 @@ const LandingPage = () => {
               </ul>
             </div>
           </div>
-          <hr className="my-6 sm:my-8 border-gray-200 dark:border-gray-800" />
-          <div className="flex flex-col md:flex-row items-center justify-between text-gray-500 dark:text-gray-400 text-xs gap-2 sm:gap-0">
+          <hr className="my-4 sm:my-5 border-gray-200 dark:border-gray-800" />
+          <div className="flex flex-col md:flex-row items-center justify-between text-gray-500 dark:text-gray-400 text-xs gap-1 sm:gap-0">
             <div className="text-center md:text-left w-full md:w-auto">
               © {new Date().getFullYear()} RoadTracker. All Rights Reserved.
             </div>
