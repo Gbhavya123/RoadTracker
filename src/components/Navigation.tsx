@@ -83,6 +83,21 @@ const Navigation = () => {
   // Only show section links on landing page
   const isLanding = location.pathname === '/';
 
+  // Handler for CTA section scroll from navbar
+  const handleCtaScroll = () => {
+    if (location.pathname !== '/') {
+      navigate('/');
+      setTimeout(() => {
+        const el = document.getElementById('cta');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      const el = document.getElementById('cta');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+    setIsMenuOpen(false);
+  };
+
   // Smooth scroll handler for Home (always available)
   const handleHomeScroll = () => {
     if (location.pathname !== '/') {
@@ -140,6 +155,14 @@ const Navigation = () => {
                 {item.name}
               </button>
             ))}
+            {/* CTA Section Link in Navbar */}
+            <button
+              onClick={handleCtaScroll}
+              className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-accent text-muted-foreground hover:text-foreground focus:outline-none"
+            >
+              <MapPin className="w-4 h-4" />
+              <span>Get Started</span>
+            </button>
             {navItems.map((item) => {
               const Icon = item.icon;
               return (

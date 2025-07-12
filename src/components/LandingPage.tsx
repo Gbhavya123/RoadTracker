@@ -210,8 +210,17 @@ const LandingPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section id="cta" className="min-h-screen flex items-center py-20 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section id="cta" className="relative min-h-screen flex items-center py-20  focus:outline-none">
+        {/* Video Background */}
+        <video
+          className="absolute inset-0 w-full h-full object-cover z-0 "
+          src="/video1.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
           <Star className="w-12 h-12 text-yellow-400 mx-auto mb-6" />
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Ready to Make a Difference?
@@ -226,9 +235,11 @@ const LandingPage = () => {
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </Link>
-            <Button variant="outline" size="lg" className="border-2 border-white text-blue-700 dark:text-white hover:bg-white hover:text-blue-700 text-lg px-8 py-4 rounded-xl transition-all duration-300">
-              Learn More
-            </Button>
+            <Link to="/map">
+              <Button variant="outline" size="lg" className="border-2 border-white text-blue-700 dark:text-white hover:bg-white hover:text-blue-700 text-lg px-8 py-4 rounded-xl transition-all duration-300">
+                Live Map
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
