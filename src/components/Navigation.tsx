@@ -63,8 +63,10 @@ const Navigation = () => {
 
   // Only show dashboard links for the correct role
   const navItems = [
-    { name: 'Report Issue', path: '/report', icon: MapPin },
-    { name: 'Live Map', path: '/map', icon: Map },
+    ...(isAuthenticated ? [
+      { name: 'Report Issue', path: '/report', icon: MapPin },
+      { name: 'Live Map', path: '/map', icon: Map },
+    ] : []),
     ...(isAuthenticated && authRole === 'user' ? [
       { name: 'Dashboard', path: '/dashboard/user', icon: User },
     ] : []),
