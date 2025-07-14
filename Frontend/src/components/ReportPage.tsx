@@ -293,7 +293,7 @@ const ReportPage = () => {
     <div className="min-h-screen relative bg-gray-50 dark:bg-gray-900 transition-colors duration-500 py-8 overflow-hidden flex items-center justify-center">
       {/* Grid background */}
       <div className="absolute inset-0 w-full h-full bg-[linear-gradient(to_right,rgba(17,24,39,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(17,24,39,0.04)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.07)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none z-0" />
-      <div className="relative z-10 w-full max-w-3xl mx-auto px-2 sm:px-6 lg:px-8">
+      <div className="relative z-10 w-full max-w-6xl mx-auto px-2 sm:px-6 lg:px-8 flex flex-col justify-center">
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-gray-900 dark:text-white mb-2">
           Report a Road Issue
         </h1>
@@ -301,9 +301,9 @@ const ReportPage = () => {
           Help make your community safer by reporting potholes, cracks, and
           other road hazards
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 items-start w-full">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-10 items-start w-full">
           {/* Issue Details Card */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-8 transition-colors duration-500 w-full mx-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-8 transition-colors duration-500 w-full md:col-span-2 md:min-h-[500px] flex flex-col justify-between">
             <CardHeader>
               <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white">
                 Issue Details
@@ -612,7 +612,7 @@ const ReportPage = () => {
             </CardContent>
           </div>
           {/* Report Preview + Tips (right column) */}
-          <div className="flex flex-col gap-4 w-full">
+          <div className="flex flex-col gap-4 w-full md:col-span-1 md:min-h-[500px]">
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-8 transition-colors duration-500 w-full mx-auto">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 Report Preview

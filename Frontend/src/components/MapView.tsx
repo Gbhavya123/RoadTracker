@@ -304,7 +304,7 @@ const MapView = () => {
           {/* Simple Sidebar */}
           <div className="space-y-6">
             {/* Statistics */}
-            <Card className="shadow-lg border-0 bg-gradient-to-br from-blue-50 to-purple-50">
+            <Card className="shadow-lg border-0 bg-white dark:bg-[#111827] text-gray-900 dark:text-white">
               <CardHeader>
                 <CardTitle className="text-lg font-semibold flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-blue-600" />
@@ -313,21 +313,21 @@ const MapView = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-                    <div className="text-2xl font-bold text-blue-600">{stats.total}</div>
-                    <div className="text-xs text-gray-600">Total Issues</div>
+                  <div className="text-center p-3 bg-gray-100 dark:bg-[#1f2937] rounded-lg shadow-sm text-gray-900 dark:text-white">
+                    <div className="text-2xl font-bold text-blue-500 dark:text-blue-400">{stats.total}</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-300">Total Issues</div>
                   </div>
-                  <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-                    <div className="text-2xl font-bold text-green-600">{stats.resolved}</div>
-                    <div className="text-xs text-gray-600">Resolved</div>
+                  <div className="text-center p-3 bg-gray-100 dark:bg-[#1f2937] rounded-lg shadow-sm text-gray-900 dark:text-white">
+                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.resolved}</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-300">Resolved</div>
                   </div>
-                  <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-                    <div className="text-2xl font-bold text-orange-600">{stats.inProgress}</div>
-                    <div className="text-xs text-gray-600">In Progress</div>
+                  <div className="text-center p-3 bg-gray-100 dark:bg-[#1f2937] rounded-lg shadow-sm text-gray-900 dark:text-white">
+                    <div className="text-2xl font-bold text-orange-500 dark:text-orange-400">{stats.inProgress}</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-300">In Progress</div>
                   </div>
-                  <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-                    <div className="text-2xl font-bold text-red-600">{stats.critical}</div>
-                    <div className="text-xs text-gray-600">Critical</div>
+                  <div className="text-center p-3 bg-gray-100 dark:bg-[#1f2937] rounded-lg shadow-sm text-gray-900 dark:text-white">
+                    <div className="text-2xl font-bold text-red-600 dark:text-red-400">{stats.critical}</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-300">Critical</div>
                   </div>
                 </div>
               </CardContent>
@@ -356,7 +356,7 @@ const MapView = () => {
                     filteredIssues.map((issue: Report) => (
                       <div 
                         key={issue._id} 
-                        className="border rounded-lg p-3 hover:bg-gray-50 transition-all duration-200 cursor-pointer transform"
+                        className="border rounded-lg p-3 hover:bg-[#23293a] hover:text-white transition-all duration-200 cursor-pointer transform"
                         onClick={() => handleReportClick(issue)}
                       >
                         <div className="flex items-start justify-between mb-2">
