@@ -57,6 +57,11 @@ const LiveMap: React.FC<LiveMapProps> = ({
   const [selectedMarker, setSelectedMarker] = useState<string | null>(null);
   const [currentStyle, setCurrentStyle] = useState(MAPBOX_CONFIG.defaultStyle);
   const [mapError, setMapError] = useState<string | null>(null);
+  // Add this state to track user location and marker
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const userMarkerRef = useRef<mapboxgl.Marker | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const accuracyCircleRef = useRef<mapboxgl.Marker | null>(null);
 
   // Initialize map
   useEffect(() => {
@@ -72,7 +77,7 @@ const LiveMap: React.FC<LiveMapProps> = ({
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: MAPBOX_CONFIG.defaultStyle,
-        center: MAPBOX_CONFIG.defaultCenter as [number, number],
+        center: MAPBOX_CONFIG.defaultCenter,
         zoom: MAPBOX_CONFIG.defaultZoom,
         attributionControl: false
       });
@@ -83,46 +88,44 @@ const LiveMap: React.FC<LiveMapProps> = ({
       // Add fullscreen control
       map.current.addControl(new mapboxgl.FullscreenControl(), 'top-right');
 
-      // Add geolocate control (LIVE LOCATION)
+      // Add geolocate control (LIVE LOCATION, high accuracy)
       const geolocate = new mapboxgl.GeolocateControl({
         positionOptions: { enableHighAccuracy: true },
-        trackUserLocation: true,
+        trackUserLocation: false, // Only center on click, do not auto-follow
+        showUserLocation: true,
         showUserHeading: true,
         fitBoundsOptions: { maxZoom: 20 }
       });
       map.current.addControl(geolocate, 'top-right');
 
-      // Store the user marker reference
+      // Custom marker and accuracy circle
       let userMarker: mapboxgl.Marker | null = null;
+      let accuracyCircle: mapboxgl.Marker | null = null;
 
-      // Automatically trigger geolocation on map load (with a delay for reliability)
-      map.current.on('load', () => {
-        setTimeout(() => {
-          geolocate.trigger();
-        }, 500);
-      });
-
-      // Listen for geolocate event to zoom and add custom marker
+      // Listen for geolocate event to show marker and accuracy circle
       geolocate.on('geolocate', (e) => {
-        const { longitude, latitude } = e.coords;
-        console.log('User geolocated:', longitude, latitude);
-        // Zoom in closely and center
-        map.current!.flyTo({ center: [longitude, latitude], zoom: 19 });
-
-        // Remove previous marker if exists
-        if (userMarker) {
-          userMarker.remove();
-        }
+        const { longitude, latitude, accuracy } = e.coords;
+        // Zoom in closely and center on user
+        map.current!.flyTo({ center: [longitude, latitude] as [number, number], zoom: 19, speed: 1.5, curve: 1.42, essential: true });
+        // Remove previous marker/circle
+        if (userMarker) userMarker.remove();
+        if (accuracyCircle) accuracyCircle.remove();
         // Add a custom pin marker at user's location
         userMarker = new mapboxgl.Marker({ color: '#2563eb' })
-          .setLngLat([longitude, latitude])
+          .setLngLat([longitude, latitude] as [number, number])
           .addTo(map.current!);
-      });
-
-      // Listen for geolocation errors
-      geolocate.on('error', (err) => {
-        console.error('Geolocation error:', err);
-        setMapError('Failed to get your location. Please allow location access and try again.');
+        // Add accuracy circle
+        const el = document.createElement('div');
+        el.style.width = `${Math.max(accuracy * 2, 20)}px`;
+        el.style.height = `${Math.max(accuracy * 2, 20)}px`;
+        el.style.background = 'rgba(37, 99, 235, 0.15)';
+        el.style.border = '2px solid #2563eb';
+        el.style.borderRadius = '50%';
+        el.style.position = 'absolute';
+        el.style.transform = 'translate(-50%, -50%)';
+        accuracyCircle = new mapboxgl.Marker({ element: el, anchor: 'center' })
+          .setLngLat([longitude, latitude] as [number, number])
+          .addTo(map.current!);
       });
 
       // Add scale control
@@ -136,25 +139,24 @@ const LiveMap: React.FC<LiveMapProps> = ({
       });
       setPopup(newPopup);
 
-        // Handle map load errors
-        map.current.on('error', (e) => {
-          console.error('Map error:', e);
-          setMapError('Failed to load map');
-        });
-
-      } catch (error) {
-        console.error('Error initializing map:', error);
-        setMapError('Failed to initialize map');
-      }
+      // Handle map load errors
+      map.current.on('error', (e) => {
+        console.error('Map error:', e);
+        setMapError('Failed to load map');
+      });
+    } catch (error) {
+      console.error('Error initializing map:', error);
+      setMapError('Failed to initialize map');
     }
+  }
 
-    return () => {
-      if (map.current) {
-        map.current.remove();
-        map.current = null;
-      }
-    };
-  }, []);
+  return () => {
+    if (map.current) {
+      map.current.remove();
+      map.current = null;
+    }
+  };
+}, []);
 
   // Handle map style changes
   const changeMapStyle = (styleUrl: string) => {
@@ -404,6 +406,9 @@ const LiveMap: React.FC<LiveMapProps> = ({
     });
   }, [reports, popup, onReportClick, onClosePopup]);
 
+  // Remove custom watchPosition effect and related state/refs
+  // Only use Mapbox's GeolocateControl for live location
+
   const getSeverityColor = (severity: string): string => {
     switch (severity) {
       case 'critical': return '#ef4444'; // red-500
@@ -479,9 +484,6 @@ const LiveMap: React.FC<LiveMapProps> = ({
         new mapboxgl.Marker({ color: '#2563eb' })
           .setLngLat(lngLat)
           .addTo(map.current!);
-      }, (error) => {
-        console.error('Error getting user location:', error);
-        setMapError('Failed to get your location. Please allow location access and try again.');
       });
     }
   };
@@ -514,7 +516,7 @@ const LiveMap: React.FC<LiveMapProps> = ({
         </div>
 
         {/* Map Style Controls - Top Left */}
-        <div className="absolute top-2 left-2 z-10 flex gap-2">
+        <div className="absolute top-2 left-4 z-20 flex flex-col gap-2">
           <Button 
             variant="outline" 
             size="sm" 
@@ -567,6 +569,11 @@ const LiveMap: React.FC<LiveMapProps> = ({
                 </div>
               )}
             </div>
+          </div>
+        )}
+        {locationError && (
+          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 bg-red-100 text-red-800 px-4 py-2 rounded shadow-lg text-sm font-medium animate-fade-in">
+            {locationError}
           </div>
         )}
       </CardContent>

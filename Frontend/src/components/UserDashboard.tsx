@@ -145,11 +145,20 @@ const UserDashboard = () => {
             <Card className="shadow-lg border-0">
               <CardHeader>
                 <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-lg">
-                      {user?.name?.split(' ').map((n: string) => n[0]).join('') || 'U'}
-                    </span>
-                  </div>
+                  {user?.picture ? (
+                    <img
+                      src={user.picture}
+                      alt="Profile"
+                      className="w-10 h-10 rounded-full object-cover border-2 border-blue-400"
+                      onError={e => (e.currentTarget.style.display = 'none')}
+                    />
+                  ) : (
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-lg">
+                        {user?.name?.split(' ').map((n: string) => n[0]).join('') || 'U'}
+                      </span>
+                    </div>
+                  )}
                   {user?.name || 'User'}
                 </CardTitle>
               </CardHeader>

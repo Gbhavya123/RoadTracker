@@ -93,6 +93,7 @@ class AuthService {
 
       // Check for existing user with this email first
       let user = await User.findOne({ email: googleProfile.email });
+      let isNewUser = false;
       
       if (user) {
         // User exists - update Google ID and picture if needed
@@ -122,6 +123,7 @@ class AuthService {
             level: 'Bronze'
           }
         });
+        isNewUser = true;
         console.log('👤 New user created:', { id: user._id, email: user.email, currentRole: user.role });
       }
       
@@ -129,48 +131,42 @@ class AuthService {
       if (requestedRole) {
         console.log('🎯 Processing role request:', requestedRole);
         console.log('📧 User email:', googleProfile.email);
-        
+        console.log('🆕 Is new user:', isNewUser);
+        console.log('👤 Current user role:', user.role);
+        // Prevent role switching after registration
         if (requestedRole === 'admin') {
-          // Check if this email should be admin - more flexible approach
-          const adminEmails = [
-            'admin@roadtracker.com', 
-            'roadtracker@gmail.com', 
-            'admin@gmail.com', 
-            'user@gmail.com',
-            // Add common test emails
-            'test@gmail.com',
-            'demo@gmail.com',
-            'admin@test.com',
-            'user@test.com'
-          ];
-          
-          console.log('🔍 Checking admin authorization for:', googleProfile.email);
-          console.log('📋 Authorized admin emails:', adminEmails);
-          
-          if (adminEmails.includes(googleProfile.email.toLowerCase())) {
+          if (isNewUser) {
+            // New user can become admin
+            console.log('🛠️ New user - allowing admin access');
             user.role = 'admin';
             user.isVerified = true;
             await user.save();
             console.log('✅ User role set to admin');
+          } else if (user.role === 'admin') {
+            // Existing admin can login as admin
+            console.log('👑 Existing admin - allowing admin login');
+            console.log('✅ Admin login successful');
           } else {
-            // For development/testing, allow any email to be admin if requested
-            if (process.env.NODE_ENV === 'development') {
-              console.log('🛠️ Development mode: Allowing admin access for any email');
-              user.role = 'admin';
-              user.isVerified = true;
-              await user.save();
-              console.log('✅ User role set to admin (development mode)');
-            } else {
-              console.log('⚠️ Email not authorized for admin role:', googleProfile.email);
-              throw new Error('This email is not authorized for admin access. Please contact support.');
-            }
+            // Existing user trying to become admin - denied
+            console.log('⚠️ Existing user - admin access denied for security');
+            throw new Error('Role switching is not allowed. You are registered as a regular user and cannot log in as admin. Please contact support if you need admin privileges.');
           }
         } else if (requestedRole === 'user') {
-          // Ensure user role
-          if (user.role === 'admin') {
+          if (isNewUser) {
+            // New user becomes user
+            console.log('👤 New user - setting as regular user');
             user.role = 'user';
+            user.isVerified = true;
             await user.save();
-            console.log('✅ User role changed to user');
+            console.log('✅ User role set to user');
+          } else if (user.role === 'user') {
+            // Existing user can login as user
+            console.log('👤 Existing user - allowing user login');
+            console.log('✅ User login successful');
+          } else if (user.role === 'admin') {
+            // Admin trying to login as user - denied
+            console.log('⚠️ Admin trying to login as user - denied');
+            throw new Error('Role switching is not allowed. You are registered as an admin and cannot log in as a regular user. Please use the admin login option.');
           }
         }
       }
@@ -450,15 +446,16 @@ class AuthService {
       if (!admin || !admin.hasPermission('manage_users')) {
         throw new Error('Insufficient permissions');
       }
-
+      // Prevent users from changing their own role
+      if (userId.toString() === adminId.toString()) {
+        throw new Error('Admins cannot change their own role for security reasons.');
+      }
       const user = await User.findById(userId);
       if (!user) {
         throw new Error('User not found');
       }
-
       user.role = newRole;
       await user.save();
-
       // Create or update admin profile if role is admin
       if (newRole === 'admin') {
         await Admin.findOneAndUpdate(
@@ -470,7 +467,6 @@ class AuthService {
         // Remove admin profile if role is not admin
         await Admin.findOneAndDelete({ user: userId });
       }
-
       return user;
     } catch (error) {
       throw new Error(`Change user role failed: ${error.message}`);

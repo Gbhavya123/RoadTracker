@@ -24,17 +24,17 @@ const { protect, authorize, requireAdmin } = require('../middlewares/auth');
 const { validateUserProfileUpdate } = require('../middlewares/validation');
 
 // Rate limiting for auth routes
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 requests per windowMs
-  message: {
-    success: false,
-    error: {
-      message: 'Too many authentication attempts, please try again later',
-      statusCode: 429
-    }
-  }
-});
+// const authLimiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: 5, // limit each IP to 5 requests per windowMs
+//   message: {
+//     success: false,
+//     error: {
+//       message: 'Too many authentication attempts, please try again later',
+//       statusCode: 429
+//     }
+//   }
+// });
 
 // Public routes
 router.options('/google', (req, res) => {
@@ -44,7 +44,7 @@ router.options('/google', (req, res) => {
   res.header('Access-Control-Allow-Credentials', 'true');
   res.status(204).end();
 });
-router.post('/google', authLimiter, googleLogin);
+router.post('/google', googleLogin);
 router.post('/refresh', refreshToken);
 router.post('/validate', validateToken);
 

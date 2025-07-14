@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useGoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import { getBestImageUrl, createFallbackImageUrl } from '@/utils/imageOptimizer';
+import { useToast } from '../hooks/use-toast';
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -19,6 +20,7 @@ const Navigation = () => {
   const location = useLocation();
   const { isAuthenticated, logout, setUser, user, role: authRole, setRole: setAuthRole, loading } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   // Google login handlers for each role
   const loginAsAdmin = useGoogleLogin({
@@ -57,27 +59,58 @@ const Navigation = () => {
         } else {
           const errorData = await response.json();
           console.error('❌ Admin login failed:', errorData);
-          
+          // Extract the most accurate error message
           let errorMessage = 'Login failed. Please try again.';
           if (errorData.error?.message) {
             errorMessage = errorData.error.message;
+          } else if (errorData.error) {
+            errorMessage = errorData.error;
+          } else if (errorData.message) {
+            errorMessage = errorData.message;
           }
-          
-          alert(`Admin Login Failed: ${errorMessage}`);
+          if (errorMessage.toLowerCase().includes('role switching')) {
+            toast({
+              title: 'Role Switching Not Allowed',
+              description: 'You cannot switch roles. You are already registered as a different role. Please log in with your original role or contact support.',
+              variant: 'destructive',
+            });
+          } else {
+            toast({
+              title: 'Admin Login Failed',
+              description: errorMessage,
+              variant: 'destructive',
+            });
+          }
         }
       } catch (error) {
         console.error('❌ Admin login error:', error);
-        
-        if (error.message.includes('Failed to fetch')) {
-          alert('Cannot connect to server. Please make sure the backend is running on port 3001.');
+        // Extract the most accurate error message for network/fetch errors
+        let errorMessage = 'Login failed. Please try again.';
+        if (error instanceof Error && error.message) {
+          errorMessage = error.message;
+        }
+        if (errorMessage.includes('Failed to fetch')) {
+          toast({
+            title: 'Network Error',
+            description: 'Cannot connect to server. Please make sure the backend is running on port 3001.',
+            variant: 'destructive',
+          });
         } else {
-          alert('Login failed. Please try again.');
+          toast({
+            title: 'Admin Login Error',
+            description: errorMessage,
+            variant: 'destructive',
+          });
         }
       }
     },
     onError: () => {
       console.error('❌ Google login error');
-      alert('Google login failed. Please try again.');
+      toast({
+        title: 'Google Login Error',
+        description: 'Google login failed. Please try again.',
+        variant: 'destructive',
+      });
     },
     flow: 'implicit',
   });
@@ -118,27 +151,58 @@ const Navigation = () => {
         } else {
           const errorData = await response.json();
           console.error('❌ User login failed:', errorData);
-          
+          // Extract the most accurate error message
           let errorMessage = 'Login failed. Please try again.';
           if (errorData.error?.message) {
             errorMessage = errorData.error.message;
+          } else if (errorData.error) {
+            errorMessage = errorData.error;
+          } else if (errorData.message) {
+            errorMessage = errorData.message;
           }
-          
-          alert(`User Login Failed: ${errorMessage}`);
+          if (errorMessage.toLowerCase().includes('role switching')) {
+            toast({
+              title: 'Role Switching Not Allowed',
+              description: 'You cannot switch roles. You are already registered as a different role. Please log in with your original role or contact support.',
+              variant: 'destructive',
+            });
+          } else {
+            toast({
+              title: 'User Login Failed',
+              description: errorMessage,
+              variant: 'destructive',
+            });
+          }
         }
       } catch (error) {
         console.error('❌ User login error:', error);
-        
-        if (error.message.includes('Failed to fetch')) {
-          alert('Cannot connect to server. Please make sure the backend is running on port 3001.');
+        // Extract the most accurate error message for network/fetch errors
+        let errorMessage = 'Login failed. Please try again.';
+        if (error instanceof Error && error.message) {
+          errorMessage = error.message;
+        }
+        if (errorMessage.includes('Failed to fetch')) {
+          toast({
+            title: 'Network Error',
+            description: 'Cannot connect to server. Please make sure the backend is running on port 3001.',
+            variant: 'destructive',
+          });
         } else {
-          alert('Login failed. Please try again.');
+          toast({
+            title: 'User Login Error',
+            description: errorMessage,
+            variant: 'destructive',
+          });
         }
       }
     },
     onError: () => {
       console.error('❌ Google login error');
-      alert('Google login failed. Please try again.');
+      toast({
+        title: 'Google Login Error',
+        description: 'Google login failed. Please try again.',
+        variant: 'destructive',
+      });
     },
     flow: 'implicit',
   });

@@ -15,7 +15,14 @@ const analyzeRoadImage = asyncHandler(async (imageBuffer, imageMimeType) => {
   console.log('Starting AI image analysis...');
   console.log('Image MIME type:', imageMimeType);
   console.log('Image buffer size:', imageBuffer.length, 'bytes');
-  
+
+  // Set timeout duration (ms)
+  const TIMEOUT_MS = parseInt(process.env.AI_ANALYSIS_TIMEOUT_MS) || 10000;
+
+  function timeoutPromise(ms) {
+    return new Promise((_, reject) => setTimeout(() => reject(new Error('AI analysis timed out')), ms));
+  }
+
   try {
     // Check if Gemini API key is configured
     if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your-gemini-api-key') {
@@ -53,23 +60,24 @@ const analyzeRoadImage = asyncHandler(async (imageBuffer, imageMimeType) => {
       }
     };
 
-    // Enhanced prompt for road issue analysis
+    // Enhanced prompt for road issue analysis (improved for real-world images)
+    // PROMPT IMPROVEMENTS: More explicit instructions, real-world edge cases, and clarity for ambiguous images
     const prompt = `
-    You are an expert road infrastructure analyst. Analyze this road image and identify any road issues with high accuracy.
+    You are an expert road infrastructure analyst. Analyze this real-world road image and identify any road issues with the highest possible accuracy.
 
     CATEGORIZATION RULES:
-    - pothole: Circular or irregular holes/depressions in asphalt/concrete surface, varying depths
-    - crack: Linear fissures, spider cracks, or structural cracks in road surface
-    - waterlogged: Standing water, flooding, or excessive water accumulation on road
-    - debris: Foreign objects, construction materials, fallen branches, or obstructions
-    - signage: Damaged, missing, obscured, or malfunctioning traffic signs/signals
-    - other: Any other road infrastructure issues not covered above
+    - pothole: Circular or irregular holes/depressions in asphalt/concrete surface, varying depths. May be filled with water, debris, or shadowed.
+    - crack: Linear fissures, spider cracks, or structural cracks in road surface. May be single or networked, thin or wide.
+    - waterlogged: Standing water, flooding, or excessive water accumulation on road. May obscure the road surface.
+    - debris: Foreign objects, construction materials, fallen branches, rocks, or obstructions. May be partially embedded or scattered.
+    - signage: Damaged, missing, obscured, or malfunctioning traffic signs/signals. May be bent, faded, blocked, or fallen.
+    - other: Any other road infrastructure issues not covered above, or if the image is unclear/ambiguous.
 
     SEVERITY ASSESSMENT:
-    - critical: Life-threatening, immediate danger, severe safety hazard, major structural damage
-    - high: Significant safety risk, major traffic disruption, requires immediate attention
-    - medium: Moderate safety concern, affects traffic flow, needs prompt repair
-    - low: Minor inconvenience, cosmetic damage, minimal safety impact
+    - critical: Life-threatening, immediate danger, severe safety hazard, major structural damage, or blocks all traffic.
+    - high: Significant safety risk, major traffic disruption, requires immediate attention, or blocks a lane.
+    - medium: Moderate safety concern, affects traffic flow, needs prompt repair, or partial obstruction.
+    - low: Minor inconvenience, cosmetic damage, minimal safety impact, or not urgent.
 
     DETAILED ANALYSIS:
     - Size: small (<30cm), medium (30-100cm), large (>100cm)
@@ -77,9 +85,11 @@ const analyzeRoadImage = asyncHandler(async (imageBuffer, imageMimeType) => {
     - Traffic Impact: none, low, medium, high, severe
     - Safety Risk: none, low, medium, high, critical
 
-    IMPORTANT: Be very precise in your analysis. If you're unsure about the issue type, choose "other". If the image doesn't show a clear road issue, respond with "other" and low severity.
-
-    Respond ONLY in this exact JSON format (no additional text):
+    IMPORTANT:
+    - If the image is blurry, dark, or does not clearly show a road issue, respond with "other" and low severity.
+    - If multiple issues are visible, describe the most severe one.
+    - Be very precise and concise. If unsure, choose "other".
+    - Respond ONLY in this exact JSON format (no additional text):
     {
       "issueType": "pothole|crack|waterlogged|debris|signage|other",
       "severity": "critical|high|medium|low",
@@ -94,10 +104,40 @@ const analyzeRoadImage = asyncHandler(async (imageBuffer, imageMimeType) => {
     }
     `;
 
-    // Generate content with image
-    const result = await model.generateContent([prompt, imagePart]);
-    const response = await result.response;
-    const text = response.text();
+    // Generate content with image, enforcing timeout
+    let result, response, text;
+    try {
+      await Promise.race([
+        (async () => {
+          result = await model.generateContent([prompt, imagePart]);
+          response = await result.response;
+          text = response.text();
+        })(),
+        timeoutPromise(TIMEOUT_MS)
+      ]);
+    } catch (err) {
+      if (err.message === 'AI analysis timed out') {
+        console.error('AI analysis timed out after', TIMEOUT_MS, 'ms');
+        return {
+          success: false,
+          data: {
+            issueType: 'other',
+            severity: 'medium',
+            confidence: 0.0,
+            description: 'AI analysis timed out. Please try again later or categorize manually.',
+            details: {
+              size: 'unknown',
+              location: 'unknown',
+              trafficImpact: 'unknown',
+              safetyRisk: 'unknown'
+            }
+          },
+          error: 'AI analysis timed out'
+        };
+      } else {
+        throw err;
+      }
+    }
 
     // Parse JSON response
     let analysis;
@@ -116,7 +156,22 @@ const analyzeRoadImage = asyncHandler(async (imageBuffer, imageMimeType) => {
     } catch (parseError) {
       console.error('Failed to parse AI response:', parseError);
       console.error('Raw response text:', text);
-      throw new Error('Invalid AI response format');
+      return {
+        success: false,
+        data: {
+          issueType: 'other',
+          severity: 'medium',
+          confidence: 0.0,
+          description: 'AI response format invalid. Please categorize manually.',
+          details: {
+            size: 'unknown',
+            location: 'unknown',
+            trafficImpact: 'unknown',
+            safetyRisk: 'unknown'
+          }
+        },
+        error: 'Invalid AI response format'
+      };
     }
 
     // Validate and sanitize the response
