@@ -1,23 +1,96 @@
 
-import React, { useState } from 'react';
-import { Filter, MapPin, AlertTriangle, Droplets, Calendar, Users } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Filter, 
+  MapPin, 
+  AlertTriangle, 
+  Droplets, 
+  Calendar, 
+  Users, 
+  TrendingUp, 
+  Clock, 
+  Eye, 
+  Zap, 
+  Shield, 
+  Target,
+  Navigation,
+  Layers,
+  RefreshCw,
+  Maximize2,
+  Minimize2,
+  Settings,
+  Bell,
+  X,
+  ChevronRight,
+  ChevronLeft,
+  Play,
+  Pause
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 
+import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider';
+import LiveMap from './LiveMap';
+import api from '@/services/api';
+
+interface Report {
+  _id: string;
+  type: string;
+  severity: string;
+  status: string;
+  location: {
+    address: string;
+    coordinates: {
+      latitude: number;
+      longitude: number;
+    };
+  };
+  description: string;
+  upvotes: Array<{ user: string }>;
+  createdAt: string;
+  reporter?: {
+    name: string;
+    email: string;
+  };
+}
+
 const MapView = () => {
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [selectedSeverity, setSelectedSeverity] = useState('all');
+  const [issues, setIssues] = useState<Report[]>([]);
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    verified: 0,
+    inProgress: 0,
+    resolved: 0,
+    critical: 0,
+    high: 0,
+    medium: 0,
+    low: 0
+  });
+  const [loading, setLoading] = useState(true);
+  
+  // Creative features
+  const [isLiveMode, setIsLiveMode] = useState(true);
+  const [showHeatmap, setShowHeatmap] = useState(false);
+  const [showTraffic, setShowTraffic] = useState(true);
+  const [mapLayers, setMapLayers] = useState(['issues', 'traffic']);
 
-  // Mock data for reported issues
-  const mockIssues = [
-    { id: 1, type: 'pothole', severity: 'high', location: 'Main Street & 5th Ave', reports: 12, status: 'verified' },
-    { id: 2, type: 'crack', severity: 'medium', location: 'Oak Boulevard', reports: 5, status: 'pending' },
-    { id: 3, type: 'waterlogged', severity: 'critical', location: 'River Road', reports: 23, status: 'in-progress' },
-    { id: 4, type: 'debris', severity: 'low', location: 'Park Avenue', reports: 3, status: 'resolved' },
-    { id: 5, type: 'pothole', severity: 'medium', location: 'Commerce Street', reports: 8, status: 'verified' },
-  ];
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [refreshInterval, setRefreshInterval] = useState(30);
+  const [showNotifications, setShowNotifications] = useState(true);
+  const [selectedTimeRange, setSelectedTimeRange] = useState('24h');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
+  
+  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const notificationRef = useRef<HTMLDivElement>(null);
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -39,102 +112,222 @@ const MapView = () => {
     }
   };
 
-  const filteredIssues = mockIssues.filter(issue => {
+  // Fetch data from backend
+  useEffect(() => {
+    const fetchMapData = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get('/map/data', {
+          params: {
+            limit: 100,
+            timeRange: selectedTimeRange
+          }
+        });
+        
+        setIssues(response.data.data.reports);
+        setStats(response.data.data.stats);
+        
+        // Show notification for new issues
+        if (showNotifications && response.data.data.reports.length > 0) {
+          showNotification(`${response.data.data.reports.length} issues updated`);
+        }
+      } catch (error) {
+        console.error('Error fetching map data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMapData();
+    
+    // Auto-refresh setup
+    if (autoRefresh && isLiveMode) {
+      refreshIntervalRef.current = setInterval(fetchMapData, refreshInterval * 1000);
+    }
+    
+    return () => {
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+      }
+    };
+  }, [autoRefresh, refreshInterval, selectedTimeRange, isLiveMode, showNotifications]);
+
+  // Notification system
+  const showNotification = (message: string) => {
+    if (notificationRef.current) {
+      notificationRef.current.textContent = message;
+      notificationRef.current.classList.add('show');
+      setTimeout(() => {
+        notificationRef.current?.classList.remove('show');
+      }, 3000);
+    }
+  };
+
+  // Toggle fullscreen
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  };
+
+  // Handle layer toggle
+  const toggleLayer = (layer: string) => {
+    setMapLayers(prev => 
+      prev.includes(layer) 
+        ? prev.filter(l => l !== layer)
+        : [...prev, layer]
+    );
+  };
+
+  const filteredIssues = issues.filter((issue: Report) => {
     if (selectedFilter !== 'all' && issue.type !== selectedFilter) return false;
     if (selectedSeverity !== 'all' && issue.severity !== selectedSeverity) return false;
     return true;
   });
 
+  const handleReportClick = (report: Report) => {
+    setSelectedReport(report);
+  };
+
+  const handleClosePopup = () => {
+    setSelectedReport(null);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-500 pb-8">
-      {/* Heading and underline */}
+      {/* Simple Header */}
       <div className="bg-white dark:bg-gray-900 transition-colors duration-500 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-between">
+            <div>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2 animate-fade-in-up">Live Road Issues Map</h1>
           <p className="text-lg text-gray-600 dark:text-gray-300">Real-time tracking of reported road issues across the city</p>
+            </div>
+            
+            {/* Live Status */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 bg-green-100 text-green-800 px-3 py-2 rounded-lg">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium">LIVE</span>
+              </div>
+              
+              <Button
+                onClick={() => window.location.reload()}
+                variant="outline"
+                size="sm"
+                className="border-gray-200 hover:bg-gray-50"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Refresh
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Simple Filter Controls */}
+        <div className="mb-6 flex flex-col sm:flex-row gap-4">
+          <Select onValueChange={setSelectedFilter} defaultValue="all">
+            <SelectTrigger className="w-40">
+              <Filter className="w-4 h-4 mr-2" />
+              <SelectValue placeholder="Filter by type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="pothole">Pothole</SelectItem>
+              <SelectItem value="crack">Road Crack</SelectItem>
+              <SelectItem value="waterlogged">Water-logging</SelectItem>
+              <SelectItem value="debris">Debris</SelectItem>
+              <SelectItem value="signage">Signage</SelectItem>
+              <SelectItem value="other">Other</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select onValueChange={setSelectedSeverity} defaultValue="all">
+            <SelectTrigger className="w-40">
+              <AlertTriangle className="w-4 h-4 mr-2" />
+              <SelectValue placeholder="Filter by severity" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Severity</SelectItem>
+              <SelectItem value="critical">Critical</SelectItem>
+              <SelectItem value="high">High</SelectItem>
+              <SelectItem value="medium">Medium</SelectItem>
+              <SelectItem value="low">Low</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Map Area */}
           <div className="lg:col-span-2">
-            <Card className="shadow-lg border-0 h-[600px] bg-white dark:bg-gray-800 transition-colors duration-500">
-              <CardContent className="p-0 h-full">
-                <div className="w-full h-full bg-gradient-to-br from-green-100 via-blue-100 to-purple-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 rounded-lg relative overflow-hidden transition-colors duration-500">
-                  {/* Map placeholder with interactive elements */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <MapPin className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2">Interactive Map</h3>
-                      <p className="text-gray-500 dark:text-gray-400 max-w-md">
-                        This would show a real map with reported issues, heatmap layers, and interactive markers
-                      </p>
-                    </div>
-                  </div>
-                  
-                  {/* Mock issue markers */}
-                  <div className="absolute top-1/4 left-1/3 transform -translate-x-1/2 -translate-y-1/2">
-                    <div className="w-4 h-4 bg-red-500 rounded-full animate-pulse shadow-lg"></div>
-                  </div>
-                  <div className="absolute top-2/3 right-1/3 transform translate-x-1/2 -translate-y-1/2">
-                    <div className="w-4 h-4 bg-orange-500 rounded-full animate-pulse shadow-lg"></div>
-                  </div>
-                  <div className="absolute bottom-1/4 left-1/2 transform -translate-x-1/2 translate-y-1/2">
-                    <div className="w-4 h-4 bg-yellow-500 rounded-full animate-pulse shadow-lg"></div>
-                  </div>
-                  
-                  {/* Map controls */}
-                  <div className="absolute top-4 right-4 z-10">
-                    <button className="px-4 py-2 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 shadow border border-gray-200 dark:border-gray-700 font-semibold text-sm transition-colors duration-300">
-                      Satellite
-                    </button>
-                  </div>
-                  <div className="absolute top-4 right-4 space-y-2">
-                    <Button variant="outline" size="sm" className="bg-white/90 hover:bg-white">
-                      <Droplets className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  
-                  {/* Legend */}
-                  <div className="absolute bottom-4 left-4 z-10">
-                    <div className="rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 shadow border border-gray-200 dark:border-gray-700 px-4 py-3 text-xs font-medium transition-colors duration-300">
-                      <div className="mb-2 font-bold text-gray-700 dark:text-gray-100">Severity Levels</div>
-                      <div className="flex items-center gap-2 mb-1"><span className="w-2 h-2 rounded-full bg-red-500 inline-block"></span> Critical</div>
-                      <div className="flex items-center gap-2 mb-1"><span className="w-2 h-2 rounded-full bg-orange-400 inline-block"></span> High</div>
-                      <div className="flex items-center gap-2 mb-1"><span className="w-2 h-2 rounded-full bg-yellow-400 inline-block"></span> Medium</div>
-                      <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-green-400 inline-block"></span> Low</div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="relative">
+              {/* Simple Map Controls */}
+              <div className="absolute top-2 right-12 z-10 flex gap-2">
+                <Button
+                  onClick={() => setShowHeatmap(!showHeatmap)}
+                  variant="outline"
+                  size="sm"
+                  className={`bg-white/95 hover:bg-white dark:bg-gray-800/95 dark:hover:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-600 ${showHeatmap ? 'bg-blue-50 border-blue-300 dark:bg-blue-900/20 dark:border-blue-400' : ''}`}
+                >
+                  <Target className="w-4 h-4 mr-2" />
+                  Heatmap
+                </Button>
+                
+                <Button
+                  onClick={() => setShowTraffic(!showTraffic)}
+                  variant="outline"
+                  size="sm"
+                  className={`bg-white/95 hover:bg-white dark:bg-gray-800/95 dark:hover:bg-gray-800 shadow-lg border-gray-200 dark:border-gray-600 ${showTraffic ? 'bg-blue-50 border-blue-300 dark:bg-blue-900/20 dark:border-blue-400' : ''}`}
+                >
+                  <Navigation className="w-4 h-4 mr-2" />
+                  Traffic
+                </Button>
+              </div>
+
+            <LiveMap 
+              reports={filteredIssues}
+              onReportClick={handleReportClick}
+              selectedReport={selectedReport}
+              onClosePopup={handleClosePopup}
+                showHeatmap={showHeatmap}
+                showTraffic={showTraffic}
+            />
+            </div>
           </div>
 
-          {/* Issues List */}
+          {/* Simple Sidebar */}
           <div className="space-y-6">
             {/* Statistics */}
-            <Card className="shadow-lg border-0">
+            <Card className="shadow-lg border-0 bg-gradient-to-br from-blue-50 to-purple-50">
               <CardHeader>
-                <CardTitle className="text-lg font-semibold">Today's Statistics</CardTitle>
+                <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-blue-600" />
+                  Today's Statistics
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">127</div>
-                    <div className="text-xs text-gray-500">Active Issues</div>
+                  <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                    <div className="text-2xl font-bold text-blue-600">{stats.total}</div>
+                    <div className="text-xs text-gray-600">Total Issues</div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">43</div>
-                    <div className="text-xs text-gray-500">Resolved Today</div>
+                  <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                    <div className="text-2xl font-bold text-green-600">{stats.resolved}</div>
+                    <div className="text-xs text-gray-600">Resolved</div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-orange-600">89</div>
-                    <div className="text-xs text-gray-500">In Progress</div>
+                  <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                    <div className="text-2xl font-bold text-orange-600">{stats.inProgress}</div>
+                    <div className="text-xs text-gray-600">In Progress</div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-purple-600">234</div>
-                    <div className="text-xs text-gray-500">Total Reports</div>
+                  <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                    <div className="text-2xl font-bold text-red-600">{stats.critical}</div>
+                    <div className="text-xs text-gray-600">Critical</div>
                   </div>
                 </div>
               </CardContent>
@@ -149,30 +342,45 @@ const MapView = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {filteredIssues.map((issue) => (
-                    <div key={issue.id} className="border rounded-lg p-3 hover:bg-gray-50 transition-colors">
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-3 h-3 rounded-full ${getSeverityColor(issue.severity)}`}></div>
-                          <span className="font-medium text-sm capitalize">
-                            {issue.type.replace('-', ' ')}
-                          </span>
-                        </div>
-                        <Badge className={`text-xs ${getStatusColor(issue.status)}`}>
-                          {issue.status}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-gray-600 mb-2">{issue.location}</p>
-                      <div className="flex items-center gap-4 text-xs text-gray-500">
-                        <div className="flex items-center gap-1">
-                          <Users className="w-3 h-3" />
-                          {issue.reports} reports
-                        </div>
-                        <div className="capitalize">{issue.severity} priority</div>
-                      </div>
+                <div className="space-y-3 max-h-96 overflow-y-auto scrollbar-hide">
+                  {loading ? (
+                    <div className="text-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                      <p className="text-gray-500 mt-2">Loading issues...</p>
                     </div>
-                  ))}
+                  ) : filteredIssues.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      No issues found with current filters
+                    </div>
+                  ) : (
+                    filteredIssues.map((issue: Report) => (
+                      <div 
+                        key={issue._id} 
+                        className="border rounded-lg p-3 hover:bg-gray-50 transition-all duration-200 cursor-pointer transform"
+                        onClick={() => handleReportClick(issue)}
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-3 h-3 rounded-full ${getSeverityColor(issue.severity)}`}></div>
+                            <span className="font-medium text-sm capitalize">
+                              {issue.type.replace('-', ' ')}
+                            </span>
+                          </div>
+                          <Badge className={`text-xs ${getStatusColor(issue.status)}`}>
+                            {issue.status}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">{issue.location.address}</p>
+                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                          <div className="flex items-center gap-1">
+                            <Users className="w-3 h-3" />
+                            {issue.upvotes?.length || 0} upvotes
+                          </div>
+                          <div className="capitalize">{issue.severity} priority</div>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>

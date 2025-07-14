@@ -1,88 +1,116 @@
-
-import React, { useState } from 'react';
-import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Link } from 'react-router-dom';
-import { ArrowRight, MapPin, Users, Shield, Star, Zap, Eye } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { GoogleLogin } from '@react-oauth/google';
-import { jwtDecode } from 'jwt-decode';
-import { useAuth } from '../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/components/ui/use-toast';
+import React from "react";
+import { useEffect } from "react";
+import { useState } from "react";
+import { useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
+import {
+  ArrowRight,
+  MapPin,
+  Users,
+  Shield,
+  Star,
+  Zap,
+  Eye,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
+import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import api from "@/services/api";
 
 const LandingPage = () => {
   const { setUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
-  const { toast } = useToast();
 
-  const handleLoginSuccess = (credentialResponse: any) => {
+  const handleLoginSuccess = async (credentialResponse: any) => {
     if (credentialResponse.credential) {
-      const decoded: any = jwtDecode(credentialResponse.credential);
-      setUser(decoded);
-      // Simple admin check: if email contains 'admin', treat as admin
-      if (decoded.email && decoded.email.includes('admin')) {
-        navigate('/admin');
-      } else {
-        navigate('/user');
+      try {
+        // Send the credential to backend for verification and user creation/login
+        const response = await api.post("/auth/google", {
+          credential: credentialResponse.credential,
+        });
+
+        const { user, accessToken, refreshToken } = response.data;
+
+        // Store tokens
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+        localStorage.setItem("user", JSON.stringify(user));
+
+        // Update auth context
+        setUser(user);
+
+        // Navigate based on role
+        if (user.role === "admin") {
+          navigate("/dashboard/admin");
+        } else {
+          navigate("/dashboard/user");
+        }
+      } catch (error) {
+        console.error("Login failed:", error);
+        // Handle login error
       }
     }
   };
 
   // On initial load, scroll hero into view if on landing page
   useEffect(() => {
-    if (location.pathname === '/') {
-      const el = document.getElementById('hero');
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    if (location.pathname === "/") {
+      const el = document.getElementById("hero");
+      if (el) el.scrollIntoView({ behavior: "smooth" });
     }
   }, [location.pathname]);
 
   const features = [
     {
       icon: MapPin,
-      title: 'Report Issues',
-      description: 'Quickly report road problems with photos and GPS location',
-      color: 'text-blue-600'
+      title: "Report Issues",
+      description: "Quickly report road problems with photos and GPS location",
+      color: "text-blue-600",
     },
     {
       icon: Eye,
-      title: 'Track Progress',
-      description: 'Monitor the status of your reports from submission to resolution',
-      color: 'text-green-600'
+      title: "Track Progress",
+      description:
+        "Monitor the status of your reports from submission to resolution",
+      color: "text-green-600",
     },
     {
       icon: Users,
-      title: 'Community Impact',
-      description: 'Join thousands of citizens making roads safer for everyone',
-      color: 'text-purple-600'
+      title: "Community Impact",
+      description: "Join thousands of citizens making roads safer for everyone",
+      color: "text-purple-600",
     },
     {
       icon: Shield,
-      title: 'Verified Reports',
-      description: 'Admin verification ensures authentic and actionable reports',
-      color: 'text-orange-600'
-    }
+      title: "Verified Reports",
+      description:
+        "Admin verification ensures authentic and actionable reports",
+      color: "text-orange-600",
+    },
   ];
 
   const steps = [
     {
-      number: '01',
-      title: 'Snap & Report',
-      description: 'Take a photo of the road issue and add location details'
+      number: "01",
+      title: "Snap & Report",
+      description: "Take a photo of the road issue and add location details",
     },
     {
-      number: '02',
-      title: 'Track Status',
-      description: 'Monitor your report as it moves through verification to resolution'
+      number: "02",
+      title: "Track Status",
+      description:
+        "Monitor your report as it moves through verification to resolution",
     },
     {
-      number: '03',
-      title: 'See Impact',
-      description: 'Watch as your community becomes safer through collective action'
-    }
+      number: "03",
+      title: "See Impact",
+      description:
+        "Watch as your community becomes safer through collective action",
+    },
   ];
 
   return (
@@ -114,42 +142,22 @@ const LandingPage = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in [animation-delay:600ms]">
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-lg px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                onClick={() => {
-                  if (!isAuthenticated) {
-                    toast({
-                      title: 'Please sign in to continue',
-                      description: 'You need to be signed in to report an issue.',
-                      variant: 'destructive',
-                    });
-                  } else {
-                    navigate('/report');
-                  }
-                }}
-              >
-                Report an Issue
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="text-lg px-8 py-4 rounded-xl border-2 hover:bg-gray-50 transition-all duration-300"
-                onClick={() => {
-                  if (!isAuthenticated) {
-                    toast({
-                      title: 'Please sign in to continue',
-                      description: 'You need to be signed in to view the live map.',
-                      variant: 'destructive',
-                    });
-                  } else {
-                    navigate('/map');
-                  }
-                }}
-              >
-                View Live Map
-              </Button>
+              <Link to="/report">
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-lg px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                  Report an Issue
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </Link>
+              <Link to="/map">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="text-lg px-8 py-4 rounded-xl border-2 hover:bg-gray-50 transition-all duration-300">
+                  View Live Map
+                </Button>
+              </Link>
             </div>
 
             {/* Stats */}
@@ -186,20 +194,25 @@ const LandingPage = () => {
             Three simple steps to make your community's roads safer
           </p>
           <div className="flex flex-col md:flex-row gap-8 md:gap-12 items-center justify-center">
-            {["/features/11.jpg", "/features/22.jpg", "/features/33.jpg"].map((img, idx) => (
-              <div
-                key={idx}
-                className="group relative cursor-pointer rounded-3xl overflow-hidden shadow-xl transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:ring-4 hover:ring-blue-300 dark:hover:ring-blue-800"
-                style={{ width: '320px', height: '380px', background: 'rgba(255,255,255,0.7)' }}
-              >
-                <img
-                  src={img}
-                  alt={`Step Visual ${idx + 1}`}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 group-hover:brightness-110 group-hover:contrast-125"
-                />
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-400/10 via-purple-400/10 to-blue-800/10 opacity-0 group-hover:opacity-80 transition-opacity duration-500 pointer-events-none" />
-              </div>
-            ))}
+            {["/features/11.jpg", "/features/22.jpg", "/features/33.jpg"].map(
+              (img, idx) => (
+                <div
+                  key={idx}
+                  className="group relative cursor-pointer rounded-3xl overflow-hidden shadow-xl transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:ring-4 hover:ring-blue-300 dark:hover:ring-blue-800"
+                  style={{
+                    width: "320px",
+                    height: "380px",
+                    background: "rgba(255,255,255,0.7)",
+                  }}>
+                  <img
+                    src={img}
+                    alt={`Step Visual ${idx + 1}`}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 group-hover:brightness-110 group-hover:contrast-125"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-400/10 via-purple-400/10 to-blue-800/10 opacity-0 group-hover:opacity-80 transition-opacity duration-500 pointer-events-none" />
+                </div>
+              )
+            )}
           </div>
         </div>
       </section>
@@ -239,11 +252,20 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Real-Time Issue Tracking (Map) Section */}
+      {/* Map Preview */}
       <section
         id="map"
-        className="min-h-screen flex items-center py-20 bg-white dark:bg-gray-900 transition-colors duration-500">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        className="relative min-h-screen flex items-center py-20 bg-white dark:bg-gray-900 transition-colors duration-500 overflow-hidden">
+        {/* Blurred map background */}
+        <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
+          <img
+            src="/features/map.png"
+            alt="Map background"
+            className="w-full h-full object-cover blur-sm opacity-40"
+            style={{ objectPosition: "center" }}
+          />
+        </div>
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Real-Time Issue Tracking
           </h2>
@@ -251,7 +273,7 @@ const LandingPage = () => {
             See reported issues on an interactive map with live updates
           </p>
           <div className="flex justify-center">
-            <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 w-full max-w-3xl transition-colors duration-500">
+            <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-3xl shadow-xl p-8 w-full max-w-3xl transition-colors duration-500">
               <div className="bg-gradient-to-br from-green-100 via-blue-100 to-purple-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 rounded-xl flex flex-col items-center justify-center h-64 mb-6 transition-colors duration-500">
                 <div className="text-center">
                   <MapPin className="w-12 h-12 text-blue-600 mx-auto mb-3" />
@@ -380,11 +402,11 @@ const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 pt-6 pb-3 sm:pt-8 sm:pb-4">
+      <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 pt-8 pb-4 sm:pt-12 sm:pb-6">
         <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
           {/* About/Description full width on mobile */}
-          <div className="mb-4 md:mb-0 flex flex-col items-start text-left w-full">
-            <div className="flex items-center mb-2">
+          <div className="mb-6 md:mb-0 flex flex-col items-start text-left w-full">
+            <div className="flex items-center mb-3">
               <img
                 src="/logo.png"
                 alt="RoadTracker Logo"
@@ -400,7 +422,7 @@ const LandingPage = () => {
             </p>
           </div>
           {/* Grid for links/sections on mobile, flex on desktop */}
-          <div className="grid grid-cols-2 gap-x-6 gap-y-4 md:flex md:flex-row md:items-start md:justify-between md:gap-8">
+          <div className="grid grid-cols-2 gap-x-8 gap-y-6 md:flex md:flex-row md:items-start md:justify-between md:gap-12">
             {/* Quick Links */}
             <div className="flex flex-col items-start">
               <h4 className="font-semibold text-gray-900 dark:text-white mb-2 text-base sm:text-lg">
@@ -529,8 +551,8 @@ const LandingPage = () => {
               </ul>
             </div>
           </div>
-          <hr className="my-4 sm:my-5 border-gray-200 dark:border-gray-800" />
-          <div className="flex flex-col md:flex-row items-center justify-between text-gray-500 dark:text-gray-400 text-xs gap-1 sm:gap-0">
+          <hr className="my-6 sm:my-8 border-gray-200 dark:border-gray-800" />
+          <div className="flex flex-col md:flex-row items-center justify-between text-gray-500 dark:text-gray-400 text-xs gap-2 sm:gap-0">
             <div className="text-center md:text-left w-full md:w-auto">
               © {new Date().getFullYear()} RoadTracker. All Rights Reserved.
             </div>
@@ -580,12 +602,13 @@ const LandingPage = () => {
         {/* Scroll to Top Button */}
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-6 right-6 z-50 backdrop-blur-md bg-blue-600/70 hover:bg-blue-700/90 text-white rounded-full p-3 shadow-2xl transition-all duration-500 ease-in-out opacity-95 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-400 animate-fade-in"
+          className="fixed bottom-20 right-3 sm:bottom-24 sm:right-6 z-60 flex items-center justify-center backdrop-blur-md bg-blue-600/70 hover:bg-blue-700/90 text-white rounded-full p-1.5 w-9 h-9 sm:p-2 sm:w-10 sm:h-10 shadow-2xl transition-all duration-500 ease-in-out opacity-95 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-400 animate-fade-in"
           style={{ boxShadow: "0 6px 32px rgba(30,64,175,0.25)" }}
           aria-label="Scroll to top">
           <svg
-            width="20"
-            height="20"
+            className="mx-auto"
+            width="18"
+            height="18"
             fill="none"
             stroke="currentColor"
             strokeWidth="2"

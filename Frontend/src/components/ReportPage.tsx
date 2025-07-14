@@ -7,17 +7,37 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import api from '@/services/api';
+
+interface AIAnalysis {
+  issueType: string;
+  severity: string;
+  confidence: number;
+  description: string;
+  details: {
+    size: string;
+    location: string;
+    trafficImpact: string;
+    safetyRisk: string;
+  };
+}
 
 const ReportPage = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [issueType, setIssueType] = useState('');
   const [severity, setSeverity] = useState('');
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
   const { toast } = useToast();
+  const { user, isAuthenticated } = useAuth();
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -25,25 +45,101 @@ const ReportPage = () => {
         setSelectedImage(e.target?.result as string);
       };
       reader.readAsDataURL(file);
+      
+      // Store the file for AI analysis
+      setImageFile(file);
+      
+      // Analyze image with AI
+      await analyzeImageWithAI(file);
+    }
+  };
+
+  const analyzeImageWithAI = async (file: File) => {
+    try {
+      setIsAnalyzing(true);
+      
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      const response = await api.post('/reports/analyze-image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
+      const analysis = response.data.data;
+      setAiAnalysis(analysis);
+      
+      // Auto-fill the form with AI suggestions
+      setIssueType(analysis.issueType);
+      setSeverity(analysis.severity);
+      setDescription(analysis.description);
+      
+      // Create detailed analysis message
+      const details = analysis.details || {};
+      const detailMessage = [
+        `Size: ${details.size || 'unknown'}`,
+        `Location: ${details.location || 'unknown'}`,
+        `Traffic Impact: ${details.trafficImpact || 'unknown'}`,
+        `Safety Risk: ${details.safetyRisk || 'unknown'}`
+      ].join(' • ');
+      
+      toast({
+        title: "AI Analysis Complete",
+        description: `${analysis.issueType} (${analysis.severity}) - ${Math.round(analysis.confidence * 100)}% confidence\n${detailMessage}`,
+      });
+      
+    } catch (error) {
+      console.error('AI Analysis failed:', error);
+      toast({
+        title: "AI Analysis Failed",
+        description: "Could not analyze image automatically. Please categorize manually.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
   const getCurrentLocation = () => {
     if (navigator.geolocation) {
+      setIsLocating(true);
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        async (position) => {
           const { latitude, longitude } = position.coords;
-          setLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
-          toast({
-            title: "Location captured",
-            description: "GPS coordinates have been added to your report",
-          });
+          try {
+            // Call backend for reverse geocoding
+            const response = await api.post('/geocode/reverse', { latitude, longitude });
+            if (response.data.success && response.data.data && response.data.data.address) {
+              setLocation(response.data.data.address);
+              toast({
+                title: 'Location captured',
+                description: 'Address has been added to your report',
+              });
+            } else {
+              setLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+              toast({
+                title: 'Location captured',
+                description: 'Coordinates have been added to your report',
+              });
+            }
+          } catch (error) {
+            setLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+            toast({
+              title: 'Location error',
+              description: 'Could not fetch address, using coordinates instead.',
+              variant: 'destructive',
+            });
+          } finally {
+            setIsLocating(false);
+          }
         },
         (error) => {
+          setIsLocating(false);
           toast({
-            title: "Location error",
-            description: "Unable to get your location. Please enter it manually.",
-            variant: "destructive",
+            title: 'Location error',
+            description: 'Unable to get your location. Please enter it manually.',
+            variant: 'destructive',
           });
         }
       );
@@ -52,23 +148,111 @@ const ReportPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to submit a report.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!issueType || !severity || !location || !description) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      let lat = 40.7128; // Default to NYC coordinates
+      let lng = -74.0060;
+      let finalAddress = location;
+      
+      // Check if location is coordinates or address
+      if (location.includes(',')) {
+        const coords = location.split(',').map(coord => parseFloat(coord.trim()));
+        if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
+          // It's coordinates, use them directly
+          lat = coords[0];
+          lng = coords[1];
+        } else {
+          // It's an address, try to geocode it
+          try {
+            const geocodeResponse = await api.post('/geocode/forward', { address: location });
+            if (geocodeResponse.data.success && geocodeResponse.data.data) {
+              lat = geocodeResponse.data.data.coordinates.latitude;
+              lng = geocodeResponse.data.data.coordinates.longitude;
+              finalAddress = geocodeResponse.data.data.address;
+            }
+          } catch (geocodeError) {
+            console.error('Geocoding failed:', geocodeError);
+            // Keep the original address if geocoding fails
+          }
+        }
+      } else {
+        // It's an address, try to geocode it
+        try {
+          const geocodeResponse = await api.post('/geocode/forward', { address: location });
+          if (geocodeResponse.data.success && geocodeResponse.data.data) {
+            lat = geocodeResponse.data.data.coordinates.latitude;
+            lng = geocodeResponse.data.data.coordinates.longitude;
+            finalAddress = geocodeResponse.data.data.address;
+          }
+        } catch (geocodeError) {
+          console.error('Geocoding failed:', geocodeError);
+          // Keep the original address if geocoding fails
+        }
+      }
 
-    toast({
-      title: "Report submitted successfully!",
-      description: "Your road issue has been reported and will be reviewed by our team.",
-    });
+      const reportData = {
+        type: issueType,
+        severity: severity,
+        location: {
+          address: finalAddress,
+          coordinates: {
+            latitude: lat,
+            longitude: lng
+          }
+        },
+        description: description,
+        images: selectedImage ? [{
+          url: selectedImage,
+          publicId: `report_${Date.now()}`
+        }] : []
+      };
 
-    // Reset form
-    setSelectedImage(null);
-    setIssueType('');
-    setSeverity('');
-    setLocation('');
-    setDescription('');
-    setIsSubmitting(false);
+      const response = await api.post('/reports', reportData);
+
+      toast({
+        title: "Report submitted successfully!",
+        description: "Your road issue has been reported and will be reviewed by our team.",
+      });
+
+      // Reset form
+      setSelectedImage(null);
+      setImageFile(null);
+      setIssueType('');
+      setSeverity('');
+      setLocation('');
+      setDescription('');
+      setAiAnalysis(null);
+    } catch (error: unknown) {
+      console.error('Error submitting report:', error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to submit report. Please try again.";
+      toast({
+        title: "Submission failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -78,9 +262,9 @@ const ReportPage = () => {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 dark:text-white mb-2">Report a Road Issue</h1>
         <p className="text-center text-gray-600 dark:text-gray-300 mb-10">Help make your community safer by reporting potholes, cracks, and other road hazards</p>
-        <div className="flex flex-col md:grid md:grid-cols-2 gap-4 md:gap-8 items-start w-full">
+        <div className="grid md:grid-cols-2 gap-8 items-start w-full">
           {/* Issue Details Card */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl md:rounded-2xl shadow p-4 md:p-8 transition-colors duration-500 w-full">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 transition-colors duration-500">
             <CardHeader>
               <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white">Issue Details</CardTitle>
             </CardHeader>
@@ -89,7 +273,7 @@ const ReportPage = () => {
                 {/* Photo Upload */}
                 <div>
                   <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                    Photo Evidence
+                    Photo Evidence {isAnalyzing && <span className="text-blue-600">(AI analyzing...)</span>}
                   </Label>
                   <div className="mt-1">
                     {selectedImage ? (
@@ -129,14 +313,79 @@ const ReportPage = () => {
                   </div>
                 </div>
 
+                {/* AI Analysis Results */}
+                {aiAnalysis && (
+                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                      <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                        🤖 AI Analysis Results ({Math.round(aiAnalysis.confidence * 100)}% confidence)
+                      </span>
+                    </div>
+                    
+                    {/* Main Analysis */}
+                    <div className="grid grid-cols-2 gap-4 text-sm mb-3">
+                      <div>
+                        <span className="text-gray-600 dark:text-gray-400">Issue Type:</span>
+                        <span className="ml-2 font-medium capitalize text-blue-700 dark:text-blue-300">
+                          {aiAnalysis.issueType.replace('-', ' ')}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600 dark:text-gray-400">Severity:</span>
+                        <span className={`ml-2 font-medium capitalize px-2 py-1 rounded text-xs ${
+                          aiAnalysis.severity === 'critical' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' :
+                          aiAnalysis.severity === 'high' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300' :
+                          aiAnalysis.severity === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' :
+                          'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                        }`}>
+                          {aiAnalysis.severity}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Detailed Analysis */}
+                    {aiAnalysis.details && (
+                      <div className="grid grid-cols-2 gap-3 text-xs mb-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg">
+                        <div>
+                          <span className="text-gray-500 dark:text-gray-400">Size:</span>
+                          <span className="ml-1 font-medium capitalize">{aiAnalysis.details.size}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500 dark:text-gray-400">Location:</span>
+                          <span className="ml-1 font-medium capitalize">{aiAnalysis.details.location}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500 dark:text-gray-400">Traffic Impact:</span>
+                          <span className="ml-1 font-medium capitalize">{aiAnalysis.details.trafficImpact}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500 dark:text-gray-400">Safety Risk:</span>
+                          <span className="ml-1 font-medium capitalize">{aiAnalysis.details.safetyRisk}</span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                      {aiAnalysis.description}
+                    </p>
+                    
+                    <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800">
+                      <p className="text-xs text-blue-600 dark:text-blue-400">
+                        💡 AI suggestions have been applied to the form above. You can modify them if needed.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Issue Type */}
                 <div>
                   <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                    Issue Type
+                    Issue Type {aiAnalysis && <span className="text-blue-600">(AI Suggested)</span>}
                   </Label>
-                  <Select onValueChange={setIssueType} value={issueType}>
-                    <SelectTrigger className="w-full bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white">
-                      <SelectValue placeholder="Select issue type" />
+                  <Select onValueChange={setIssueType} value={issueType} disabled={isAnalyzing}>
+                    <SelectTrigger className={`w-full bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white ${aiAnalysis ? 'border-blue-300 bg-blue-50' : ''}`}>
+                      <SelectValue placeholder={isAnalyzing ? "Analyzing image..." : "Select issue type"} />
                     </SelectTrigger>
                     <SelectContent className="bg-white dark:bg-gray-800">
                       <SelectItem value="pothole">Pothole</SelectItem>
@@ -152,11 +401,11 @@ const ReportPage = () => {
                 {/* Severity */}
                 <div>
                   <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                    Severity Level
+                    Severity Level {aiAnalysis && <span className="text-blue-600">(AI Suggested)</span>}
                   </Label>
-                  <Select onValueChange={setSeverity} value={severity}>
-                    <SelectTrigger className="w-full bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white">
-                      <SelectValue placeholder="Select severity" />
+                  <Select onValueChange={setSeverity} value={severity} disabled={isAnalyzing}>
+                    <SelectTrigger className={`w-full bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white ${aiAnalysis ? 'border-blue-300 bg-blue-50' : ''}`}>
+                      <SelectValue placeholder={isAnalyzing ? "Analyzing image..." : "Select severity"} />
                     </SelectTrigger>
                     <SelectContent className="bg-white dark:bg-gray-800">
                       <SelectItem value="low">Low - Minor inconvenience</SelectItem>
@@ -185,8 +434,16 @@ const ReportPage = () => {
                       variant="outline"
                       onClick={getCurrentLocation}
                       className="px-4 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                      disabled={isLocating}
                     >
-                      <MapPin className="w-4 h-4" />
+                      {isLocating ? (
+                        <>
+                          <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2 inline-block" />
+                          Locating...
+                        </>
+                      ) : (
+                        <MapPin className="w-4 h-4" />
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -194,22 +451,28 @@ const ReportPage = () => {
                 {/* Description */}
                 <div>
                   <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                    Additional Notes (Optional)
+                    Additional Notes (Optional) {aiAnalysis && <span className="text-blue-600">(AI Suggested)</span>}
                   </Label>
                   <Textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Provide any additional details about the issue..."
-                    className="min-h-[100px] resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                    placeholder={isAnalyzing ? "Analyzing image..." : "Provide any additional details about the issue..."}
+                    className={`min-h-[100px] resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${aiAnalysis ? 'border-blue-300 bg-blue-50' : ''}`}
+                    disabled={isAnalyzing}
                   />
                 </div>
 
                 <Button
                   type="submit"
-                  disabled={!selectedImage || !issueType || !severity || !location || isSubmitting}
+                  disabled={!selectedImage || !issueType || !severity || !location || isSubmitting || isAnalyzing}
                   className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 py-3 text-white dark:text-gray-900"
                 >
-                  {isSubmitting ? (
+                  {isAnalyzing ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                      Analyzing Image...
+                    </>
+                  ) : isSubmitting ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
                       Submitting Report...
@@ -225,8 +488,8 @@ const ReportPage = () => {
             </CardContent>
           </div>
           {/* Report Preview + Tips (right column) */}
-          <div className="flex flex-col gap-4 w-full mt-4 md:mt-0">
-            <div className="bg-white dark:bg-gray-800 rounded-xl md:rounded-2xl shadow p-4 md:p-8 transition-colors duration-500 w-full">
+          <div className="flex flex-col gap-4">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 transition-colors duration-500">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Report Preview</h2>
               <CardContent>
                 <div className="space-y-4">
@@ -289,7 +552,7 @@ const ReportPage = () => {
           </div>
         </div>
         {/* Tips Card for mobile (below grid) */}
-        <div className="bg-blue-50 dark:bg-gray-900 rounded-lg p-4 mt-4 text-left shadow border border-blue-100 dark:border-gray-700 md:hidden">
+        <div className="bg-blue-50 dark:bg-gray-900 rounded-xl p-6 mt-4 text-left shadow border border-blue-100 dark:border-gray-700 md:hidden">
           <h3 className="text-blue-700 dark:text-blue-300 font-semibold mb-2 flex items-center gap-2">
             <span>📝</span> Reporting Tips
           </h3>

@@ -1,7 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useAuth } from '../hooks/useAuth';
 import { FileText, CheckCircle, Clock, AlertCircle, Award } from 'lucide-react';
+import api from '@/services/api';
+
+interface Report {
+  _id: string;
+  type: string;
+  status: string;
+  location: {
+    address: string;
+  };
+  createdAt: string;
+}
 
 const statusColors: Record<string, string> = {
   resolved: 'bg-green-100 text-green-800',
@@ -19,16 +30,31 @@ const statusIcons: Record<string, React.ReactNode> = {
 
 const MyReports = () => {
   const { user } = useAuth();
-  const reports = user?.reports || [
-    { id: 1, type: 'Pothole', location: 'Main Street & 5th Ave', status: 'resolved', date: '2024-06-10' },
-    { id: 2, type: 'Road Crack', location: 'Oak Boulevard', status: 'in-progress', date: '2024-06-12' },
-    { id: 3, type: 'Water-logging', location: 'River Road', status: 'verified', date: '2024-06-14' },
-  ];
+  const [reports, setReports] = useState<Report[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const resolved = reports.filter((r) => r.status === 'resolved').length;
-  const inProgress = reports.filter((r) => r.status === 'in-progress').length;
-  const verified = reports.filter((r) => r.status === 'verified').length;
-  const pending = reports.filter((r) => r.status === 'pending').length;
+  useEffect(() => {
+    const fetchUserReports = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get('/reports/user/me');
+        setReports(response.data.data);
+      } catch (error) {
+        console.error('Error fetching user reports:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchUserReports();
+    }
+  }, [user]);
+
+  const resolved = reports.filter((r: Report) => r.status === 'resolved').length;
+  const inProgress = reports.filter((r: Report) => r.status === 'in-progress').length;
+  const verified = reports.filter((r: Report) => r.status === 'verified').length;
+  const pending = reports.filter((r: Report) => r.status === 'pending').length;
 
   return (
     <div className="min-h-screen py-12 px-4 flex flex-col items-center relative overflow-hidden">
@@ -65,18 +91,27 @@ const MyReports = () => {
             <div className="text-center text-gray-500 dark:text-gray-300 py-8">You have not submitted any reports yet.</div>
           ) : (
             <div className="space-y-4">
-              {reports.map((report) => (
-                <div key={report.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col md:flex-row md:items-center md:justify-between">
-                  <div>
-                    <div className="font-semibold text-blue-700 dark:text-blue-300">{report.type}</div>
-                    <div className="text-gray-500 dark:text-gray-300 text-sm">{report.location}</div>
-                  </div>
-                  <div className="flex flex-col md:items-end mt-2 md:mt-0">
-                    <span className={`text-xs font-medium px-2 py-1 rounded mb-1 flex items-center gap-1 ${statusColors[report.status] || 'bg-gray-100 text-gray-800'}`}>{statusIcons[report.status]}{report.status}</span>
-                    <span className="text-xs text-gray-400">{report.date}</span>
-                  </div>
+              {loading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="text-gray-500 mt-2">Loading your reports...</p>
                 </div>
-              ))}
+              ) : reports.length === 0 ? (
+                <div className="text-center text-gray-500 dark:text-gray-300 py-8">You have not submitted any reports yet.</div>
+              ) : (
+                reports.map((report: Report) => (
+                  <div key={report._id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <div className="font-semibold text-blue-700 dark:text-blue-300">{report.type}</div>
+                      <div className="text-gray-500 dark:text-gray-300 text-sm">{report.location.address}</div>
+                    </div>
+                    <div className="flex flex-col md:items-end mt-2 md:mt-0">
+                      <span className={`text-xs font-medium px-2 py-1 rounded mb-1 flex items-center gap-1 ${statusColors[report.status] || 'bg-gray-100 text-gray-800'}`}>{statusIcons[report.status]}{report.status}</span>
+                      <span className="text-xs text-gray-400">{new Date(report.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           )}
         </CardContent>
