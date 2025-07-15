@@ -317,9 +317,7 @@ const Navigation = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center transform group-hover:scale-105 transition-transform duration-200">
-              <MapPin className="w-6 h-6 text-white" />
-            </div>
+            <img src="/logo.png" alt="RoadTracker Logo" className="w-10 h-10 object-contain" />
             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
               RoadTracker
             </span>
