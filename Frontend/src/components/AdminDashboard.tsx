@@ -576,17 +576,17 @@ const AdminDashboard = () => {
       <div className="relative z-10 max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2 animate-fade-in-up">Admin Dashboard</h1>
         <p className="text-gray-600 dark:text-gray-300 mb-6 sm:mb-10 text-sm sm:text-base">Manage and track road issue reports across the city</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-10">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-10">
           {/* Stat Cards */}
           {stats.map((stat, idx) => (
             <div
               key={idx}
-              className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:via-black dark:to-gray-900 border border-indigo-200 dark:border-indigo-700 rounded-2xl shadow-xl p-6 flex flex-col items-center transition-all duration-300 animate-fade-in-up hover:scale-105 hover:shadow-2xl hover:border-indigo-400 dark:hover:border-indigo-400 hover:bg-white/90 dark:hover:bg-gray-700/80 cursor-pointer"
+              className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:via-black dark:to-gray-900 border border-indigo-200 dark:border-indigo-700 rounded-2xl shadow-xl p-3 sm:p-6 flex flex-col items-center transition-all duration-300 animate-fade-in-up hover:scale-105 hover:shadow-2xl hover:border-indigo-400 dark:hover:border-indigo-400 hover:bg-white/90 dark:hover:bg-gray-700/80 cursor-pointer min-w-0"
               style={{ animationDelay: `${idx * 0.1 + 0.2}s` }}
             >
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 text-2xl ${stat.color}`}>{stat.icon}</div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{stat.value}</div>
-              <div className="text-sm text-gray-600 dark:text-gray-300">{stat.label}</div>
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center mb-2 sm:mb-3 text-xl sm:text-2xl ${stat.color}`}>{stat.icon}</div>
+              <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-0.5 sm:mb-1">{stat.value}</div>
+              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 text-center">{stat.label}</div>
             </div>
           ))}
         </div>
