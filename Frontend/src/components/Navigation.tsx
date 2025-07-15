@@ -591,22 +591,7 @@ const Navigation = () => {
             {/* Admin-specific mobile menu items */}
             {isAuthenticated && authRole === 'admin' && (
               <>
-                <Link
-                  to="/profile"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:bg-accent hover:text-foreground"
-                >
-                  <Shield className="w-5 h-5" />
-                  <span>Admin Profile</span>
-                </Link>
-                <Link
-                  to="/dashboard/admin"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:bg-accent hover:text-foreground"
-                >
-                  <Shield className="w-5 h-5" />
-                  <span>Dashboard</span>
-                </Link>
+                {/* Removed Admin Profile link for admin */}
               </>
             )}
 

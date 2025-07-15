@@ -573,11 +573,11 @@ const AdminDashboard = () => {
     <div className="relative min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 transition-colors duration-500 py-12 overflow-hidden">
       {/* Make grid lines more visible by increasing opacity */}
       <div className="absolute inset-0 w-full h-full bg-[linear-gradient(to_right,rgba(17,24,39,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(17,24,39,0.04)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.07)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none z-0" />
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2 animate-fade-in-up">Admin Dashboard</h1>
-        <p className="text-gray-600 dark:text-gray-300 mb-10">Manage and track road issue reports across the city</p>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-          {/* Stat Cards with smooth hover, no sparkle border */}
+      <div className="relative z-10 max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2 animate-fade-in-up">Admin Dashboard</h1>
+        <p className="text-gray-600 dark:text-gray-300 mb-6 sm:mb-10 text-sm sm:text-base">Manage and track road issue reports across the city</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-10">
+          {/* Stat Cards */}
           {stats.map((stat, idx) => (
             <div
               key={idx}
@@ -623,12 +623,12 @@ const AdminDashboard = () => {
           </div>
         )}
         {/* Complaint Management Card with bright text and smooth hover */}
-        <div className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:via-black dark:to-gray-900 rounded-2xl shadow-2xl p-8 transition-colors duration-500 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
-          <h2 className="text-xl font-bold text-indigo-700 dark:text-indigo-400 mb-6 animate-fade-in-up">Complaint Management ({filteredComplaints.length})</h2>
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4">
-            <div className="flex gap-3">
+        <div className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:via-black dark:to-gray-900 rounded-2xl shadow-2xl p-4 sm:p-8 transition-colors duration-500 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
+          <h2 className="text-lg sm:text-xl font-bold text-indigo-700 dark:text-indigo-400 mb-4 sm:mb-6 animate-fade-in-up">Complaint Management ({filteredComplaints.length})</h2>
+          <div className="flex flex-col gap-3 sm:gap-0 sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
               <Select onValueChange={setSelectedStatus} defaultValue="all">
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-full sm:w-40">
                   <Filter className="w-4 h-4 mr-2" />
                   <SelectValue />
                 </SelectTrigger>
@@ -640,9 +640,8 @@ const AdminDashboard = () => {
                   <SelectItem value="resolved">Resolved</SelectItem>
                 </SelectContent>
               </Select>
-              
               <Select onValueChange={setSelectedSeverity} defaultValue="all">
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-full sm:w-40">
                   <AlertTriangle className="w-4 h-4 mr-2" />
                   <SelectValue />
                 </SelectTrigger>
@@ -655,12 +654,11 @@ const AdminDashboard = () => {
                 </SelectContent>
               </Select>
             </div>
-            
-            <div className="mt-4 lg:mt-0">
+            <div className="mt-2 sm:mt-0 w-full sm:w-auto">
               <Link to="/map">
                 <Button 
                   variant="outline" 
-                  className="border-gray-200 text-black hover:bg-blue-50"
+                  className="w-full sm:w-auto border-gray-200 text-black hover:bg-blue-50"
                 >
                   <Map className="w-4 h-4 mr-2" />
                   View Live Map
@@ -669,32 +667,28 @@ const AdminDashboard = () => {
             </div>
           </div>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {filteredComplaints.map((complaint, idx) => (
                 <div
                   key={complaint._id}
-                  className="bg-gray-50 dark:bg-gray-900 rounded-xl p-6 shadow transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-l-4 hover:border-indigo-400 dark:hover:border-indigo-400 hover:bg-white/90 dark:hover:bg-gray-700/80 cursor-pointer"
+                  className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 sm:p-6 shadow transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-l-4 hover:border-indigo-400 dark:hover:border-indigo-400 hover:bg-white/90 dark:hover:bg-gray-700/80 cursor-pointer"
                   style={{ animationDelay: `${idx * 0.05 + 0.6}s` }}
                 >
-                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-semibold text-gray-800 dark:text-gray-100">#{complaint._id.slice(-6)} - {complaint.type}</h3>
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                        <h3 className="font-semibold text-gray-800 dark:text-gray-100 truncate">#{complaint._id.slice(-6)} - {complaint.type}</h3>
                         <Badge className={`${getStatusColor(complaint.status)} capitalize`}>
                           {complaint.status.replace('-', ' ')}
                         </Badge>
-                        <span className={`text-sm font-medium capitalize ${getSeverityColor(complaint.severity)}`}>
-                          {complaint.severity}
-                        </span>
+                        <span className={`text-sm font-medium capitalize ${getSeverityColor(complaint.severity)}`}>{complaint.severity}</span>
                       </div>
-                      
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center gap-2 mb-2 text-xs sm:text-sm">
                         <MapPin className="w-4 h-4 text-gray-500" />
-                        <span className="text-gray-600">{complaint.location.address}</span>
+                        <span className="text-gray-600 truncate">{complaint.location.address}</span>
                       </div>
-                      <p className="text-sm text-gray-500 mb-2">{complaint.description}</p>
-                      
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <p className="text-xs sm:text-sm text-gray-500 mb-2 break-words">{complaint.description}</p>
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500">
                         <div className="flex items-center gap-1">
                           <Users className="w-4 h-4" />
                           {complaint.upvotes?.length || 0} upvotes
@@ -709,41 +703,39 @@ const AdminDashboard = () => {
                         )}
                       </div>
                     </div>
-                    
-                    <div className="flex items-center gap-2 mt-4 lg:mt-0">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:gap-2 mt-3 sm:mt-0 w-full sm:w-auto">
                       <Button
                         variant="outline"
                         size="sm"
+                        className="w-full sm:w-auto"
                         onClick={() => handleOpenModal(complaint._id)}
                       >
                         <Eye className="w-4 h-4 mr-1" />
                         View
                       </Button>
-                      
                       {complaint.status === 'pending' && (
                         <Button
                           size="sm"
+                          className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700"
                           onClick={() => handleStatusUpdate(complaint._id, 'verified')}
-                          className="bg-orange-600 hover:bg-orange-700"
                         >
                           Verify
                         </Button>
                       )}
-                      
                       {complaint.status === 'verified' && (
                         <Button
                           size="sm"
+                          className="w-full sm:w-auto"
                           onClick={() => handleStatusUpdate(complaint._id, 'in-progress')}
                         >
                           Start Work
                         </Button>
                       )}
-                      
                       {complaint.status === 'in-progress' && (
                         <Button
                           size="sm"
+                          className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
                           onClick={() => handleStatusUpdate(complaint._id, 'resolved')}
-                          className="bg-green-600 hover:bg-green-700"
                         >
                           Mark Resolved
                         </Button>
@@ -755,14 +747,13 @@ const AdminDashboard = () => {
             </div>
           </CardContent>
         </div>
-
         {/* Report Detail Modal */}
         {viewingReport && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-semibold">Report Details</h2>
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
+            <div className="bg-white rounded-lg w-full max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+              <div className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
+                  <h2 className="text-lg sm:text-xl font-semibold">Report Details</h2>
                   <Button
                     variant="outline"
                     onClick={handleCloseModal}
@@ -770,21 +761,19 @@ const AdminDashboard = () => {
                     Close
                   </Button>
                 </div>
-                
-                                {(() => {
+                {(() => {
                   const currentReport = complaints.find(c => c._id === viewingReport);
                   if (!currentReport) return null;
-                  
                   return (
                     <div className="space-y-4">
-                      <div className="grid md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                           {currentReport.images && currentReport.images.length > 0 ? (
                             <div className="space-y-2">
                               <img
                                 src={currentReport.images[0].url}
                                 alt="Issue"
-                                className="w-full h-48 object-cover rounded-lg border"
+                                className="w-full h-40 sm:h-48 object-cover rounded-lg border"
                                 onError={(e) => {
                                   e.currentTarget.src = '/placeholder.svg';
                                 }}
@@ -796,7 +785,7 @@ const AdminDashboard = () => {
                                       key={idx}
                                       src={img.url}
                                       alt={`Issue ${idx + 2}`}
-                                      className="w-20 h-20 object-cover rounded border"
+                                      className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded border"
                                       onError={(e) => {
                                         e.currentTarget.src = '/placeholder.svg';
                                       }}
@@ -806,12 +795,12 @@ const AdminDashboard = () => {
                               )}
                             </div>
                           ) : (
-                            <div className="w-full h-48 bg-gray-100 dark:bg-gray-800 rounded-lg border flex items-center justify-center">
+                            <div className="w-full h-40 sm:h-48 bg-gray-100 dark:bg-gray-800 rounded-lg border flex items-center justify-center">
                               <span className="text-gray-500">No images available</span>
                             </div>
                           )}
                         </div>
-                        <div className="space-y-3">
+                        <div className="space-y-2 sm:space-y-3">
                           <div>
                             <label className="font-medium text-gray-700">Status</label>
                             <Select onValueChange={setModalStatus} value={modalStatus}>
@@ -826,7 +815,6 @@ const AdminDashboard = () => {
                               </SelectContent>
                             </Select>
                           </div>
-                          
                           <div>
                             <label className="font-medium text-gray-700">Assign Contractor</label>
                             <Select onValueChange={setModalContractor} value={modalContractor}>
@@ -844,7 +832,6 @@ const AdminDashboard = () => {
                           </div>
                         </div>
                       </div>
-                      
                       <div>
                         <label className="font-medium text-gray-700">Resolution Notes</label>
                         <Textarea
@@ -854,9 +841,8 @@ const AdminDashboard = () => {
                           onChange={(e) => setModalNotes(e.target.value)}
                         />
                       </div>
-                      
                       {/* Image Upload Section */}
-                      <div className="space-y-3">
+                      <div className="space-y-2 sm:space-y-3">
                         <label className="font-medium text-gray-700">Add Resolution Photo</label>
                         <div className="space-y-2">
                           <input
@@ -866,7 +852,6 @@ const AdminDashboard = () => {
                             onChange={handleImageSelect}
                             className="hidden"
                           />
-                          
                           {!selectedImage ? (
                             <Button
                               variant="outline"
@@ -882,7 +867,7 @@ const AdminDashboard = () => {
                                 <img
                                   src={imagePreview}
                                   alt="Preview"
-                                  className="w-full h-32 object-cover rounded-lg border"
+                                  className="w-full h-24 sm:h-32 object-cover rounded-lg border"
                                 />
                                 <Button
                                   size="sm"
@@ -893,7 +878,7 @@ const AdminDashboard = () => {
                                   <X className="w-4 h-4" />
                                 </Button>
                               </div>
-                              <div className="flex gap-2">
+                              <div className="flex flex-col sm:flex-row gap-2">
                                 <Button
                                   onClick={handleImageUpload}
                                   disabled={uploadingImage}
@@ -904,6 +889,7 @@ const AdminDashboard = () => {
                                 <Button
                                   variant="outline"
                                   onClick={removeSelectedImage}
+                                  className="flex-1"
                                 >
                                   Cancel
                                 </Button>
@@ -912,7 +898,6 @@ const AdminDashboard = () => {
                           )}
                         </div>
                       </div>
-                      
                       <div className="flex gap-2">
                         <Button 
                           className="flex-1"
