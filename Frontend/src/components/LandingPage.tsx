@@ -602,7 +602,7 @@ const LandingPage = () => {
         {/* Scroll to Top Button */}
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-20 right-3 sm:bottom-24 sm:right-6 z-60 flex items-center justify-center backdrop-blur-md bg-blue-600/70 hover:bg-blue-700/90 text-white rounded-full p-1.5 w-9 h-9 sm:p-2 sm:w-10 sm:h-10 shadow-2xl transition-all duration-500 ease-in-out opacity-95 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-400 animate-fade-in"
+          className="fixed bottom-16 right-3 sm:bottom-20 sm:right-6 z-50 flex items-center justify-center backdrop-blur-md bg-blue-600/70 hover:bg-blue-700/90 text-white rounded-full p-1.5 w-9 h-9 sm:p-2 sm:w-10 sm:h-10 shadow-2xl transition-all duration-500 ease-in-out opacity-95 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-400 animate-fade-in"
           style={{ boxShadow: "0 6px 32px rgba(30,64,175,0.25)" }}
           aria-label="Scroll to top">
           <svg

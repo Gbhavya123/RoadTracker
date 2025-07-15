@@ -749,14 +749,16 @@ const AdminDashboard = () => {
         </div>
         {/* Report Detail Modal */}
         {viewingReport && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
-            <div className="bg-white rounded-lg w-full max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-              <div className="p-4 sm:p-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
-                  <h2 className="text-lg sm:text-xl font-semibold">Report Details</h2>
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50 px-2">
+            <div className="bg-white rounded-xl w-full max-w-md sm:max-w-lg max-h-[80vh] overflow-y-auto mt-20 mb-6">
+              <div className="p-2 sm:p-6">
+                <div className="sticky top-0 z-10 bg-white pb-2 sm:pb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-gray-100 mt-14 sm:mt-0">
+                  <h2 className="text-base sm:text-xl font-semibold">Report Details</h2>
                   <Button
                     variant="outline"
+                    size="sm"
                     onClick={handleCloseModal}
+                    className="mt-1 sm:mt-0"
                   >
                     Close
                   </Button>
