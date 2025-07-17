@@ -173,6 +173,15 @@ const reportSchema = new mongoose.Schema({
     precipitation: String,
     windSpeed: Number
   },
+  // Add weather snapshot and update time
+  weather: {
+    type: Object,
+    default: null
+  },
+  weatherUpdatedAt: {
+    type: Date,
+    default: null
+  },
   trafficImpact: {
     type: String,
     enum: ['none', 'low', 'medium', 'high', 'severe'],
@@ -221,6 +230,10 @@ const reportSchema = new mongoose.Schema({
       type: Date,
       default: Date.now
     }
+  },
+  lastWeatherNotificationSentAt: {
+    type: Date,
+    default: null,
   }
 }, {
   timestamps: true,

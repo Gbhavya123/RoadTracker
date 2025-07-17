@@ -38,7 +38,8 @@ const {
   getDuplicateReports,
   linkDuplicateReports,
   analyzeImage,
-  getAIAnalysisStats
+  getAIAnalysisStats,
+  refreshWeatherForAllReports
 } = require('../controllers/reportController');
 
 // Import middleware
@@ -72,6 +73,29 @@ router.get('/ai-stats', requireAdmin, getAIAnalysisStats);
 router.get('/stats', requireAdmin, getReportStats);
 router.get('/stats/by-type', requireAdmin, getReportsByType);
 router.get('/urgent', requireAdmin, getUrgentReports);
+// Add admin endpoint to refresh weather for all reports
+router.post('/refresh-weather', requireAdmin, async (req, res) => {
+  return refreshWeatherForAllReports(req, res);
+});
+
+// Add test endpoint to check weather service
+router.get('/test-weather', requireAdmin, async (req, res) => {
+  try {
+    const { getCurrentWeather } = require('../services/weatherService');
+    const testWeather = await getCurrentWeather(21.250713, 81.61805); // Test coordinates
+    res.json({
+      success: true,
+      weather: testWeather,
+      message: testWeather ? 'Weather service is working' : 'Weather service returned null'
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      error: error.message,
+      message: 'Weather service is not working'
+    });
+  }
+});
 
 // Parameterized routes (must come last)
 router.get('/:id', getReportById);

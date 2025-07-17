@@ -260,6 +260,61 @@ View report details: ${process.env.CLIENT_URL}/reports/${report._id}`;
 }
 
 /**
+ * Send a weather-based notification to the user for their report
+ */
+async function sendWeatherAffectedReportNotification(report, weatherData) {
+  const transporter = getTransporter();
+  if (!transporter) {
+    console.log('📧 Email service not configured, skipping weather notification');
+    return { success: false, error: 'Email service not configured' };
+  }
+
+  if (!report.reporter?.email) {
+    console.warn('No reporter email available for weather notification');
+    return { success: false, error: 'No reporter email available' };
+  }
+
+  // Customize message based on weather condition
+  let subject = `Update on Your Road Issue: Weather Alert`;
+  let weatherInfo = ``;
+
+  if (weatherData && weatherData.condition) {
+    weatherInfo = `Current weather at your report location (${report.location.address}): ${weatherData.description} (${weatherData.temperature}°C).`;
+    if (weatherData.condition.toLowerCase().includes('rain') || weatherData.condition.toLowerCase().includes('drizzle')) {
+      subject = `Important Update: Rain Affecting Your Road Issue at ${report.location.address}`; 
+      weatherInfo += ` Due to current rain, resolution of your report might be delayed. We appreciate your patience.`;
+    } else if (weatherData.condition.toLowerCase().includes('snow')) {
+      subject = `Important Update: Snow Affecting Your Road Issue at ${report.location.address}`; 
+      weatherInfo += ` Due to snow, resolution of your report might be delayed. We appreciate your patience.`;
+    } else if (weatherData.condition.toLowerCase().includes('storm') || weatherData.condition.toLowerCase().includes('thunderstorm')) {
+      subject = `Urgent Update: Storm Warning for Your Road Issue at ${report.location.address}`; 
+      weatherInfo += ` Severe weather conditions might prevent immediate resolution. Your safety is our priority.`;
+    }
+  } else {
+    weatherInfo = `We are currently checking weather conditions at your report location (${report.location.address}).`;
+  }
+
+  const text = `Hello ${report.reporter.name},
+
+This is an update regarding your reported road issue:
+
+Issue Type: ${report.type}
+Location: ${report.location.address}
+
+${weatherInfo}
+
+For more details, please visit your report page: ${process.env.CLIENT_URL}/reports/${report._id}
+
+Thank you for using RoadTracker.`;
+
+  return await sendEmail({
+    to: report.reporter.email,
+    subject,
+    text
+  });
+}
+
+/**
  * Send daily summary to admins
  */
 async function sendDailySummary(stats) {

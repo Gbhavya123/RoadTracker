@@ -21,6 +21,7 @@ const adminRoutes = require('./routes/admin');
 const mapRoutes = require('./routes/map');
 const chatRoutes = require('./routes/chat');
 const geocodingRoutes = require('./routes/geocoding');
+const weatherRoutes = require('./routes/weather');
 
 // Import middleware
 const errorHandler = require('./middlewares/errorHandler');
@@ -181,6 +182,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/map', mapRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/geocode', geocodingRoutes);
+app.use('/api/weather', weatherRoutes);
 
 // Error handling middleware
 app.use(notFound);

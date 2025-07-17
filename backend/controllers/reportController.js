@@ -3,13 +3,26 @@ const ReportService = require('../services/reportService');
 const AIService = require('../services/aiService');
 const { sendNewReportNotification, sendStatusUpdateNotification, sendContractorAssignmentNotification, sendReportSubmissionConfirmation } = require('../services/emailService');
 const { processReportsWithGeocoding } = require('../utils/geocodingUtils');
+const { getCurrentWeather } = require('../services/weatherService'); // Import weather service
 
 // @desc    Create new report
 // @route   POST /api/reports
 // @access  Private
 const createReport = asyncHandler(async (req, res) => {
   try {
-    const report = await ReportService.createReport(req.body, req.user._id);
+    let weather = null;
+    let weatherError = null;
+    if (req.body.location && req.body.location.coordinates) {
+      const { latitude, longitude } = req.body.location.coordinates;
+      try {
+        weather = await getCurrentWeather(latitude, longitude);
+        if (weather && weather.error) weatherError = weather.error;
+      } catch (err) {
+        weatherError = err.message;
+        console.error('Weather fetch failed during report creation:', err.message);
+      }
+    }
+    const report = await ReportService.createReport({ ...req.body, weather, weatherUpdatedAt: weather ? new Date() : null, weatherError }, req.user._id);
     
     // Emit real-time events for immediate updates
     const io = req.app.get('io');
@@ -18,18 +31,24 @@ const createReport = asyncHandler(async (req, res) => {
     io.emit('admin:stats:update');
 
     // Send professional email notification to admins
+    // Email notification log
+    let emailLog = [];
     try {
       await sendNewReportNotification(report, req.user);
+      emailLog.push({ type: 'new_report', status: 'success', message: 'Sent', timestamp: new Date() });
     } catch (emailError) {
+      emailLog.push({ type: 'new_report', status: 'failure', message: emailError.message, timestamp: new Date() });
       console.error('Email notification failed:', emailError);
     }
-
-    // Send confirmation email to user
     try {
       await sendReportSubmissionConfirmation(report, req.user);
+      emailLog.push({ type: 'other', status: 'success', message: 'User confirmation sent', timestamp: new Date() });
     } catch (emailError) {
+      emailLog.push({ type: 'other', status: 'failure', message: emailError.message, timestamp: new Date() });
       console.error('User confirmation email failed:', emailError);
     }
+    report.emailNotificationLog = emailLog;
+    await report.save();
 
     res.status(201).json({
       success: true,
@@ -54,9 +73,39 @@ const getReports = asyncHandler(async (req, res) => {
   try {
     const result = await ReportService.getReports(req.query, req.query);
 
-    // Process reports with geocoding if reports array exists
+    // Process reports with geocoding and fetch live weather
     if (result.reports && Array.isArray(result.reports)) {
-      result.reports = await processReportsWithGeocoding(result.reports);
+      const geocodedReports = await processReportsWithGeocoding(result.reports);
+      
+      const reportsWithWeather = await Promise.all(geocodedReports.map(async (report) => {
+        let weatherData = null;
+        let weatherError = null;
+
+        if (report.location && report.location.coordinates) {
+          const { latitude, longitude } = report.location.coordinates;
+          const weatherResult = await getCurrentWeather(latitude, longitude, report._id);
+
+          if (weatherResult && !weatherResult.error) {
+            weatherData = weatherResult;
+            await ReportService.updateWeather(report._id, weatherData, new Date(), null);
+          } else {
+            weatherError = weatherResult.error || 'Weather service unavailable.';
+            await ReportService.updateWeather(report._id, null, report.weatherUpdatedAt, weatherError);
+          }
+        } else {
+          weatherError = 'No coordinates available for this report.';
+          await ReportService.updateWeather(report._id, null, report.weatherUpdatedAt, weatherError);
+        }
+
+        // Attach latest data to the report object for the response
+        report.weather = weatherData;
+        report.weatherError = weatherError;
+        report.weatherUpdatedAt = weatherData ? new Date() : report.weatherUpdatedAt;
+
+        return report;
+      }));
+
+      result.reports = reportsWithWeather;
     }
 
     res.status(200).json({
@@ -609,6 +658,75 @@ const getAIAnalysisStats = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc    Refresh weather for all reports (Admin only)
+// @route   POST /api/reports/refresh-weather
+// @access  Private (Admin)
+const refreshWeatherForAllReports = asyncHandler(async (req, res) => {
+  try {
+    const allReports = await ReportService.getReports({}, {});
+    let updatedCount = 0;
+    if (allReports.reports && Array.isArray(allReports.reports)) {
+      for (let i = 0; i < allReports.reports.length; i++) {
+        const report = allReports.reports[i];
+        if (report.location && report.location.coordinates) {
+          const { latitude, longitude } = report.location.coordinates;
+          try {
+            const weather = await getCurrentWeather(latitude, longitude);
+            if (weather) {
+              await ReportService.updateWeather(report._id, weather, new Date());
+              updatedCount++;
+            }
+          } catch (err) {
+            console.error(`Weather refresh failed for report ${report._id}:`, err.message);
+          }
+        }
+      }
+    }
+    res.status(200).json({
+      success: true,
+      message: `Weather refreshed for ${updatedCount} reports.`
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: {
+        message: error.message,
+        statusCode: 500
+      }
+    });
+  }
+});
+
+// Manual weather refresh endpoint
+const refreshWeatherForReport = asyncHandler(async (req, res) => {
+  try {
+    const report = await ReportService.getReportById(req.params.id);
+    if (!report || !report.location || !report.location.coordinates) {
+      return res.status(404).json({ success: false, message: 'Report or coordinates not found' });
+    }
+    const { latitude, longitude } = report.location.coordinates;
+    const weather = await getCurrentWeather(latitude, longitude, report._id);
+    report.weather = weather;
+    report.weatherUpdatedAt = new Date();
+    if (weather && weather.error) report.weatherError = weather.error;
+    else report.weatherError = null;
+    await report.save();
+    res.json({ success: true, weather });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+// Email log fetch endpoint
+const getEmailLogForReport = asyncHandler(async (req, res) => {
+  try {
+    const report = await ReportService.getReportById(req.params.id);
+    if (!report) return res.status(404).json({ success: false, message: 'Report not found' });
+    res.json({ success: true, emailNotificationLog: report.emailNotificationLog || [] });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 module.exports = {
   createReport,
   getReports,
@@ -629,5 +747,8 @@ module.exports = {
   getDuplicateReports,
   linkDuplicateReports,
   analyzeImage,
-  getAIAnalysisStats
+  getAIAnalysisStats,
+  refreshWeatherForAllReports,
+  refreshWeatherForReport,
+  getEmailLogForReport
 }; 
