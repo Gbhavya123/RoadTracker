@@ -34,7 +34,7 @@ const server = http.createServer(app);
 const corsOrigins = process.env.CORS_ORIGIN 
   ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
   : process.env.NODE_ENV === 'production' 
-    ? ['https://road-tracker-one.vercel.app/'] 
+    ? ['https://road-tracker-one.vercel.app'] 
     : ['http://localhost:5173', 'http://localhost:8080'];
 
 const io = new Server(server, {
@@ -112,7 +112,13 @@ app.use(helmet({
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "https:"],
       scriptSrc: ["'self'", "https://accounts.google.com"],
-      connectSrc: ["'self'", "https://accounts.google.com", "https://www.googleapis.com"]
+      connectSrc: [
+        "'self'",
+        "https://accounts.google.com",
+        "https://www.googleapis.com",
+        "https://roadtracker-4c2n.onrender.com",
+        "wss://roadtracker-4c2n.onrender.com"
+      ]
     }
   }
 }));
@@ -134,20 +140,33 @@ app.use(helmet({
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
+    if (!origin) {
+      console.log('✅ CORS: No origin header (likely mobile/curl request)');
+      return callback(null, true);
+    }
     
-    if (corsOrigins.indexOf(origin) !== -1) {
+    // Check if origin is in allowed list
+    const isAllowed = corsOrigins.some(allowed => {
+      // Remove trailing slashes for comparison
+      const allowedOrigin = allowed.toLowerCase().replace(/\/$/, '');
+      const requestOrigin = origin.toLowerCase().replace(/\/$/, '');
+      return allowedOrigin === requestOrigin;
+    });
+    
+    if (isAllowed) {
+      console.log('✅ CORS allowed origin:', origin);
       callback(null, true);
     } else {
-      console.log('CORS blocked origin:', origin);
+      console.log('❌ CORS blocked origin:', origin, '| Allowed origins:', corsOrigins);
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['X-Total-Count', 'X-Page-Count'],
   preflightContinue: false,
-  optionsSuccessStatus: 204
+  optionsSuccessStatus: 200
 }));
 
 // Body parsing middleware
@@ -173,6 +192,9 @@ app.get('/health', (req, res) => {
     environment: process.env.NODE_ENV
   });
 });
+
+// Handle preflight requests for all routes
+app.options('*', cors());
 
 // API routes
 app.use('/api/auth', authRoutes);
