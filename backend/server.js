@@ -34,7 +34,7 @@ const server = http.createServer(app);
 const corsOrigins = process.env.CORS_ORIGIN 
   ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
   : process.env.NODE_ENV === 'production' 
-    ? ['https://your-frontend-domain.com'] 
+    ? ['https://road-tracker-one.vercel.app/'] 
     : ['http://localhost:5173', 'http://localhost:8080'];
 
 const io = new Server(server, {
