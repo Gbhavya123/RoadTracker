@@ -3,6 +3,8 @@ import { useEffect } from "react";
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { FaLinkedin, FaGithub } from "react-icons/fa";
+import { MdEmail } from "react-icons/md";
 import {
   ArrowRight,
   MapPin,
@@ -376,9 +378,8 @@ const LandingPage = () => {
                       onClick={() => setOpenIdx(isOpen ? null : idx)}>
                       <span>{faq.q}</span>
                       <svg
-                        className={`ml-2 w-5 h-5 text-gray-400 transform transition-transform duration-300 ${
-                          isOpen ? "rotate-180" : ""
-                        }`}
+                        className={`ml-2 w-5 h-5 text-gray-400 transform transition-transform duration-300 ${isOpen ? "rotate-180" : ""
+                          }`}
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="2"
@@ -387,9 +388,8 @@ const LandingPage = () => {
                       </svg>
                     </button>
                     <div
-                      className={`px-2 pb-2 text-gray-700 dark:text-gray-200 text-xs md:text-sm transition-all duration-300 overflow-hidden ${
-                        isOpen ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
-                      }`}
+                      className={`px-2 pb-2 text-gray-700 dark:text-gray-200 text-xs md:text-sm transition-all duration-300 overflow-hidden ${isOpen ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
+                        }`}
                       style={{ pointerEvents: isOpen ? "auto" : "none" }}>
                       {faq.a}
                     </div>
@@ -483,35 +483,30 @@ const LandingPage = () => {
               <h4 className="font-semibold text-gray-900 dark:text-white mb-2 text-base sm:text-lg">
                 CONTACT
               </h4>
-              <ul className="space-y-1 text-gray-600 dark:text-gray-300 text-sm">
-                <li>
-                  <a
-                    href="https://www.linkedin.com/in/anujshrivastava1/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline">
-                    Anuj Shrivastava (Team Lead)
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://www.linkedin.com/in/divyansh-agrawal-4556a0299/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline">
-                    Divyansh Agrawal
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://www.linkedin.com/in/bhavya-gupta-88664128a/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline">
-                    Bhavya Gupta
-                  </a>
-                </li>
-              </ul>
+              <div className="flex gap-4 text-2xl">
+                <a
+                  href="https://www.linkedin.com/in/bhavya-gupta-88664128a/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
+                  title="LinkedIn">
+                  <FaLinkedin />
+                </a>
+                <a
+                  href="https://github.com/Gbhavya123"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-200"
+                  title="GitHub">
+                  <FaGithub />
+                </a>
+                <a
+                  href="mailto:bhavyagupta18561@gmail.com"
+                  className="text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200"
+                  title="Email">
+                  <MdEmail />
+                </a>
+              </div>
             </div>
             {/* Legal */}
             <div className="flex flex-col items-start">
